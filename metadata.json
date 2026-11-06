@@ -1,0 +1,8 @@
+{
+  "name": "Bylance — онлайн магазин электроники",
+  "description": "Онлайн каталог оригинальной электроники Bylance в Алматы: Apple, Dyson, фототехника. Рассрочка Kaspi, Halyk, спеццены и заказ в WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
