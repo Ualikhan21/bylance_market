@@ -77,9 +77,9 @@ export interface CategoryInfo {
 }
 
 export const CATEGORIES: CategoryInfo[] = [
-  { id: 'apple', name: 'APPLE', description: 'iPhone, iPad, MacBook, AirPods, Apple Watch' },
-  { id: 'dyson', name: 'DYSON', description: 'Стайлеры и выпрямители волос' },
-  { id: 'other', name: 'ДРУГИЕ ТОВАРЫ', description: 'Фотокамеры, Ray-Ban Meta, DJI, Яндекс Станция' },
+  { id: 'apple', name: 'Apple', description: 'iPhone, iPad, MacBook, AirPods, Apple Watch' },
+  { id: 'dyson', name: 'Dyson', description: 'Стайлеры и выпрямители волос' },
+  { id: 'other', name: 'Фото и гаджеты', description: 'Фотокамеры, Ray-Ban Meta, DJI, Яндекс Станция' },
 ];
 
 // ВАРИАНТ ТОВАРА

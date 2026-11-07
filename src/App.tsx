@@ -26,7 +26,8 @@ import {
   Zap,
   HelpCircle,
   ExternalLink,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import {
   SITE_INFO,
@@ -121,9 +122,17 @@ interface FaqItem {
   id: string;
   question: string;
   answer: string;
+  hasTradeInLinks?: boolean;
+  hasTelegramLink?: boolean;
 }
 
 const FAQ_LIST: FaqItem[] = [
+  {
+    id: 'faq-trade-in',
+    question: 'Как работает программа Trade-In и какие устройства принимаются?',
+    answer: 'В магазине Bylance по программе Trade-In принимаются исключительно оригинальные Apple iPhone!\n\n• Оценка в офисе: точную и итоговую оценку состояния телефона (экран, корпус, True Tone, Face ID, процент износа АКБ) делает наш специалист лично в офисе в Алматы (пр. Абылай хана).\n• Онлайн-оценка через сайт: вы также можете предварительно попробовать рассчитать стоимость вашего iPhone онлайн через форму оценки на сайте (ссылка ниже) либо отправив фото и характеристики в WhatsApp.\n• Доплата: остаток стоимости любого нового устройства вы можете доплатить наличными с максимальной скидкой или оформить в рассрочку Kaspi / Halyk (0-0-12 / 0-0-24).\n\nВсе проверенные б/у iPhone, принятые по Trade-In, с реальными фото и процентом АКБ публикуются в нашем официальном Telegram-канале.',
+    hasTradeInLinks: true,
+  },
   {
     id: 'faq-1',
     question: 'Как работает рассрочка Kaspi и Halyk (0-0-12 / 0-0-24)?',
@@ -156,8 +165,9 @@ const FAQ_LIST: FaqItem[] = [
   },
   {
     id: 'faq-7',
-    question: 'Где посмотреть каталог Б/У техники?',
-    answer: 'Вся проверенная Б/У техника и устройства по программе Trade-In выкладываются исключительно в нашем Telegram-канале с подробными живыми фотографиями, процентом АКБ и актуальными ценами.'
+    question: 'Где посмотреть каталог проверенной Б/У техники по Trade-In?',
+    answer: 'Вся проверенная Б/У техника и устройства, принятые по программе Trade-In, выкладываются исключительно в нашем Telegram-канале с подробными живыми фотографиями, процентом АКБ и актуальными ценами.',
+    hasTelegramLink: true,
   }
 ];
 
@@ -530,45 +540,29 @@ export default function App() {
             </a>
           </div>
 
-          {/* Desktop Navigation Links — visible only on large desktop (>= 1024px) so tablet never collides */}
-          <nav className="hidden lg:flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
-            <button
-              onClick={() => { setSelectedCategory('apple'); setSelectedSubcategory('all'); }}
-              className={`hover:text-[#5B0601] dark:hover:text-white transition-colors ${
-                selectedCategory === 'apple' ? 'text-[#5B0601] dark:text-white font-bold' : ''
-              }`}
+          {/* Top Header Navigation (Catalog, FAQ, and Contacts as icon) */}
+          <nav className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+            <a
+              href="#catalog"
+              className="py-1 px-2 rounded-lg hover:text-[#5B0601] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             >
-              Apple
-            </button>
-            <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
-            <button
-              onClick={() => { setSelectedCategory('dyson'); setSelectedSubcategory('all'); }}
-              className={`hover:text-[#5B0601] dark:hover:text-white transition-colors ${
-                selectedCategory === 'dyson' ? 'text-[#5B0601] dark:text-white font-bold' : ''
-              }`}
-            >
-              Dyson
-            </button>
-            <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
-            <button
-              onClick={() => { setSelectedCategory('other'); setSelectedSubcategory('all'); }}
-              className={`hover:text-[#5B0601] dark:hover:text-white transition-colors ${
-                selectedCategory === 'other' ? 'text-[#5B0601] dark:text-white font-bold' : ''
-              }`}
-            >
-              Фото и гаджеты
-            </button>
-            <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
-            <a href="#payment-methods" className="hover:text-[#5B0601] dark:hover:text-white transition-colors">
-              Способы оплаты
+              Каталог
             </a>
             <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
-            <a href="#faq" className="hover:text-[#5B0601] dark:hover:text-white transition-colors">
+            <a
+              href="#faq"
+              className="py-1 px-2 rounded-lg hover:text-[#5B0601] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+            >
               FAQ
             </a>
             <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
-            <a href="#contacts" className="hover:text-[#5B0601] dark:hover:text-white transition-colors">
-              Контакты
+            <a
+              href="#contacts"
+              aria-label="Контакты магазина в Алматы"
+              title="Контакты в Алматы"
+              className="p-1.5 sm:p-2 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors flex items-center justify-center"
+            >
+              <MapPin className="w-4 h-4" />
             </a>
           </nav>
 
@@ -598,80 +592,7 @@ export default function App() {
                 </span>
               )}
             </button>
-
-            {/* Direct WhatsApp Header Link */}
-            <a
-              href={`https://wa.me/${SITE_INFO.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 text-xs font-bold rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white transition-all shadow-sm flex items-center gap-1.5"
-            >
-              <MessageCircle className="w-3.5 h-3.5 fill-current" />
-              <span className="hidden sm:inline">WhatsApp</span>
-            </a>
           </div>
-        </div>
-
-        {/* MOBILE & TABLET STICKY CATEGORY QUICK BAR (NO EMOJIS, SUPER CLEAN) */}
-        <div className="lg:hidden border-t border-slate-200/60 dark:border-white/5 bg-slate-50/95 dark:bg-[#0c0f17]/95 px-3 sm:px-6 py-2 overflow-x-auto no-scrollbar flex items-center gap-2 text-xs font-bold">
-          <button
-            onClick={() => { setSelectedCategory('all'); setSelectedSubcategory('all'); }}
-            className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
-              selectedCategory === 'all'
-                ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
-            }`}
-          >
-            Все товары
-          </button>
-          <button
-            onClick={() => { setSelectedCategory('apple'); setSelectedSubcategory('all'); }}
-            className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
-              selectedCategory === 'apple'
-                ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
-            }`}
-          >
-            Apple
-          </button>
-          <button
-            onClick={() => { setSelectedCategory('dyson'); setSelectedSubcategory('all'); }}
-            className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
-              selectedCategory === 'dyson'
-                ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
-            }`}
-          >
-            Dyson
-          </button>
-          <button
-            onClick={() => { setSelectedCategory('other'); setSelectedSubcategory('all'); }}
-            className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
-              selectedCategory === 'other'
-                ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
-            }`}
-          >
-            Фото и гаджеты
-          </button>
-          <a
-            href="#payment-methods"
-            className="px-3 py-1 rounded-lg shrink-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5"
-          >
-            Способы оплаты
-          </a>
-          <a
-            href="#faq"
-            className="px-3 py-1 rounded-lg shrink-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5"
-          >
-            FAQ
-          </a>
-          <a
-            href="#contacts"
-            className="px-3 py-1 rounded-lg shrink-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5"
-          >
-            Контакты
-          </a>
         </div>
       </header>
 
@@ -705,7 +626,14 @@ export default function App() {
                 Категории каталога:
               </span>
               <button
-                onClick={() => { setSelectedCategory('all'); setSelectedSubcategory('all'); setIsMobileMenuOpen(false); }}
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSelectedSubcategory('all');
+                  setIsMobileMenuOpen(false);
+                  setTimeout(() => {
+                    document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }}
                 className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between ${
                   selectedCategory === 'all'
                     ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
@@ -717,7 +645,14 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => { setSelectedCategory('apple'); setSelectedSubcategory('all'); setIsMobileMenuOpen(false); }}
+                onClick={() => {
+                  setSelectedCategory('apple');
+                  setSelectedSubcategory('all');
+                  setIsMobileMenuOpen(false);
+                  setTimeout(() => {
+                    document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }}
                 className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between ${
                   selectedCategory === 'apple'
                     ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
@@ -731,7 +666,14 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => { setSelectedCategory('dyson'); setSelectedSubcategory('all'); setIsMobileMenuOpen(false); }}
+                onClick={() => {
+                  setSelectedCategory('dyson');
+                  setSelectedSubcategory('all');
+                  setIsMobileMenuOpen(false);
+                  setTimeout(() => {
+                    document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }}
                 className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between ${
                   selectedCategory === 'dyson'
                     ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
@@ -745,7 +687,14 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => { setSelectedCategory('other'); setSelectedSubcategory('all'); setIsMobileMenuOpen(false); }}
+                onClick={() => {
+                  setSelectedCategory('other');
+                  setSelectedSubcategory('all');
+                  setIsMobileMenuOpen(false);
+                  setTimeout(() => {
+                    document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }}
                 className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between ${
                   selectedCategory === 'other'
                     ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
@@ -759,11 +708,26 @@ export default function App() {
               </button>
             </div>
 
-            {/* Quick Section Anchors */}
+            {/* Sections in Store */}
             <div className="space-y-1 pt-3 border-t border-slate-200 dark:border-white/10">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-                Быстрый переход:
+                Разделы магазина:
               </span>
+              <a
+                href="#catalog"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+              >
+                Каталог товаров
+              </a>
+              <a
+                href="#trade-in"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-between"
+              >
+                <span>Программа Trade-In</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold">Обмен</span>
+              </a>
               <a
                 href="#payment-methods"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -841,16 +805,41 @@ export default function App() {
             Apple, Dyson, фототехника и умные гаджеты в Алматы. Выбирайте память и способ оплаты: рассрочка Kaspi и Halyk, спеццены или скидка при расчёте наличными.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-medium text-slate-600 dark:text-slate-400">
-            <span className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 shadow-xs">
-              Рассрочка Kaspi и Halyk (0-0-12 / 0-0-24)
-            </span>
-            <span className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 shadow-xs">
-              Специальные акционные цены
-            </span>
-            <span className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 shadow-xs">
-              Максимальная скидка за наличную оплату
-            </span>
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <a
+              href="#catalog"
+              onClick={() => handleSelectGlobalPayment('kaspi')}
+              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 border-b-2 border-b-blue-600 dark:border-b-blue-400 shadow-xs hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all inline-flex items-center gap-1.5 group active:scale-95"
+            >
+              <span>Рассрочка Kaspi и Halyk (0-0-12 / 0-0-24)</span>
+              <ChevronDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
+            </a>
+
+            <a
+              href="#catalog"
+              onClick={() => handleSelectGlobalPayment('promo')}
+              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 border-b-2 border-b-blue-600 dark:border-b-blue-400 shadow-xs hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all inline-flex items-center gap-1.5 group active:scale-95"
+            >
+              <span>Специальные акционные цены</span>
+              <ChevronDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
+            </a>
+
+            <a
+              href="#catalog"
+              onClick={() => handleSelectGlobalPayment('cash')}
+              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 border-b-2 border-b-blue-600 dark:border-b-blue-400 shadow-xs hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all inline-flex items-center gap-1.5 group active:scale-95"
+            >
+              <span>Максимальная скидка за наличную оплату</span>
+              <ChevronDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
+            </a>
+
+            <a
+              href="#trade-in"
+              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 border-b-2 border-b-blue-600 dark:border-b-blue-400 shadow-xs hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all inline-flex items-center gap-1.5 group active:scale-95 text-amber-800 dark:text-amber-300"
+            >
+              <span>Программа Trade-In (обмен)</span>
+              <ChevronDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
+            </a>
           </div>
         </section>
 
@@ -900,6 +889,26 @@ export default function App() {
               <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>2ГИС Алматы</span>
             </a>
+          </div>
+        </section>
+
+        {/* TRADE-IN BANNER & HIGHLIGHT */}
+        <section id="trade-in" className="scroll-mt-20 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-amber-950/30 border border-amber-300/60 dark:border-amber-700/40 shadow-xs">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white text-center md:text-left">
+              Обменяйте старый iPhone на любую новую технику с доплатой
+            </h2>
+            <RefreshCw className="w-12 h-12 text-amber-500" />
+            <a
+              href="https://bylance.kz/trade-in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+              >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Онлайн-оценка на сайте ↗</span>
+            </a>
+
           </div>
         </section>
 
@@ -1024,11 +1033,11 @@ export default function App() {
             </div>
           </div>
 
-          {/* Desktop Category Tabs */}
-          <div className="hidden lg:flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-3">
+          {/* Category Tabs (Visible on all screens with horizontal scroll) */}
+          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-3 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all border ${
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all border shrink-0 min-h-[40px] flex items-center justify-center active:scale-95 ${
                 selectedCategory === 'all'
                   ? 'bg-[#5B0601] text-white border-[#5B0601] shadow-sm dark:bg-white dark:text-slate-900 dark:border-white'
                   : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
@@ -1044,7 +1053,7 @@ export default function App() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all border ${
+                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all border shrink-0 min-h-[40px] flex items-center justify-center active:scale-95 ${
                     isSelected
                       ? 'bg-[#5B0601] text-white border-[#5B0601] shadow-sm dark:bg-white dark:text-slate-900 dark:border-white'
                       : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
@@ -1056,19 +1065,19 @@ export default function App() {
             })}
           </div>
 
-          {/* Subcategory Pills */}
+          {/* Subcategory Pills (Enlarged & Easy to Tap) */}
           {availableSubcategories.length > 1 && (
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-xs text-slate-400 mr-1 flex items-center gap-1">
-                <Filter className="w-3 h-3" />
-                Подкатегория:
+            <div className="flex items-center gap-2 pt-1 overflow-x-auto no-scrollbar pb-1">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0 flex items-center gap-1.5 mr-0.5">
+                <Filter className="w-3.5 h-3.5 text-[#5B0601] dark:text-rose-400" />
+                <span>Подкатегория:</span>
               </span>
               <button
                 onClick={() => setSelectedSubcategory('all')}
-                className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all ${
+                className={`text-xs sm:text-sm px-4 py-2 rounded-xl border font-bold transition-all shrink-0 min-h-[38px] flex items-center justify-center active:scale-95 ${
                   selectedSubcategory === 'all'
-                    ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white'
-                    : 'bg-white dark:bg-[#121622] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
+                    : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                 }`}
               >
                 Все
@@ -1078,10 +1087,10 @@ export default function App() {
                 <button
                   key={subcat}
                   onClick={() => setSelectedSubcategory(subcat)}
-                  className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all ${
+                  className={`text-xs sm:text-sm px-4 py-2 rounded-xl border font-bold transition-all shrink-0 min-h-[38px] flex items-center justify-center active:scale-95 ${
                     selectedSubcategory === subcat
-                      ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white'
-                      : 'bg-white dark:bg-[#121622] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50'
+                      ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
+                      : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                   }`}
                 >
                   {subcat}
@@ -1142,12 +1151,12 @@ export default function App() {
                       <div className="p-4 sm:p-5 space-y-4">
                         
                         {/* Subcategory & Warranty & Title */}
-                        <div className="space-y-1.5">
+                        <div className="space-y-1 sm:space-y-1.5">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/5">
+                            <span className="text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/5">
                               {model.subcategory}
                             </span>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-[11px] sm:text-xs text-slate-400">
                               {model.warranty}
                             </span>
                           </div>
@@ -1185,7 +1194,7 @@ export default function App() {
                         )}
 
                         {/* SELECTOR 2: STORAGE (MEMORY) */}
-                        {model.storageOptions && model.storageOptions.length > 1 && (
+                        {model.storageOptions && model.storageOptions.length > 0 && (
                           <div className="space-y-1.5">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                               Объём памяти:
@@ -1213,7 +1222,7 @@ export default function App() {
                         )}
 
                         {/* SELECTOR 3: SIZE (FOR APPLE WATCH) */}
-                        {model.sizeOptions && model.sizeOptions.length > 1 && (
+                        {model.sizeOptions && model.sizeOptions.length > 0 && (
                           <div className="space-y-1.5">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                               Размер корпуса:
@@ -1383,8 +1392,63 @@ export default function App() {
                   </button>
 
                   {isOpen && (
-                    <div className="px-4 pb-5 sm:px-5 sm:pb-6 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-white/5 pt-3 animate-fade-in">
-                      {faq.answer}
+                    <div className="px-4 pb-5 sm:px-5 sm:pb-6 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-white/5 pt-3 animate-fade-in space-y-3">
+                      <p className="whitespace-pre-line">{faq.answer}</p>
+
+                      {faq.hasTradeInLinks && (
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <a
+                            href="https://bylance.kz/trade-in"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Онлайн-оценка на сайте ↗</span>
+                          </a>
+
+                          <a
+                            href={`https://wa.me/${SITE_INFO.whatsapp}?text=${encodeURIComponent('Здравствуйте! Хочу оценить свой iPhone по программе Trade-In в магазине Bylance.')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                            <span>Оценить в WhatsApp у сотрудника</span>
+                          </a>
+
+                          <a
+                            href={`https://t.me/${SITE_INFO.telegram}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#229ED9] hover:bg-[#1e8ec3] text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Канал Trade-In и Б/У в Telegram</span>
+                          </a>
+
+                          <a
+                            href="#catalog"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 font-bold text-xs transition-all"
+                          >
+                            <span>Перейти в каталог</span>
+                          </a>
+                        </div>
+                      )}
+
+                      {faq.hasTelegramLink && (
+                        <div className="pt-1">
+                          <a
+                            href={`https://t.me/${SITE_INFO.telegram}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#229ED9] hover:bg-[#1e8ec3] text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Открыть Telegram-канал @{SITE_INFO.telegram} ↗</span>
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1428,7 +1492,7 @@ export default function App() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#181d2a] border border-slate-100 dark:border-white/5 space-y-2">
               <ShieldCheck className="w-6 h-6 text-[#5B0601] dark:text-rose-400" />
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">100% Оригинал</h3>
@@ -1445,6 +1509,14 @@ export default function App() {
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">Рассрочка Kaspi и Halyk</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Выгодные программы рассрочки 0-0-12 и 0-0-24 через Kaspi и Halyk Bank без скрытых переплат.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#181d2a] border border-slate-100 dark:border-white/5 space-y-2">
+              <RefreshCw className="w-6 h-6 text-amber-500" />
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">Программа Trade-In</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Сдайте старый гаджет в зачёт нового с онлайн-оценкой за 5 минут в WhatsApp и минимальной доплатой.
               </p>
             </div>
 
