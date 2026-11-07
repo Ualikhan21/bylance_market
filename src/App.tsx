@@ -6,17 +6,12 @@ import {
   Minus,
   Check,
   MapPin,
-  Clock,
   MessageCircle,
   Send,
   Sun,
   Moon,
   Search,
   X,
-  CreditCard,
-  Banknote,
-  Tag,
-  CheckCircle2,
   ShieldCheck,
   Copy,
   ChevronRight,
@@ -24,7 +19,6 @@ import {
   Filter,
   Menu,
   Zap,
-  HelpCircle,
   ExternalLink,
   Loader2,
   RefreshCw
@@ -893,22 +887,26 @@ export default function App() {
         </section>
 
         {/* TRADE-IN BANNER & HIGHLIGHT */}
-        <section id="trade-in" className="scroll-mt-20 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-amber-950/30 border border-amber-300/60 dark:border-amber-700/40 shadow-xs">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white text-center md:text-left">
-              Обменяйте старый iPhone на любую новую технику с доплатой
-            </h2>
-            <RefreshCw className="w-12 h-12 text-amber-500" />
+        <section id="trade-in" className="scroll-mt-20 p-4 sm:p-5 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-amber-950/30 border border-amber-300/60 dark:border-amber-700/40 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+            <div className="flex items-center gap-3.5 sm:gap-4 text-center sm:text-left min-w-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-900 dark:text-white leading-snug">
+                Обменяйте старый iPhone на любую новую технику с доплатой
+              </h2>
+            </div>
+
             <a
               href="https://bylance.kz/trade-in"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-all active:scale-95"
-              >
-              <ExternalLink className="w-3.5 h-3.5" />
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 whitespace-nowrap"
+            >
+              <ExternalLink className="w-4 h-4 shrink-0" />
               <span>Онлайн-оценка на сайте ↗</span>
             </a>
-
           </div>
         </section>
 
