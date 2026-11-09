@@ -784,232 +784,24 @@ export default function App() {
       {/* ====================================================================== */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-10">
 
-        {/* 2. HERO BANNER */}
-        <section className="text-center py-4 sm:py-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold mb-3 border border-emerald-200 dark:border-emerald-800/60 shadow-xs">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>100% Оригинальная техника с официальной гарантией</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-3">
-            Магазин оригинальной техники Bylance
-          </h1>
-
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-6 leading-relaxed">
-            Apple, Dyson, фототехника и умные гаджеты в Алматы. Выбирайте память и способ оплаты: рассрочка Kaspi и Halyk, спеццены или скидка при расчёте наличными.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-            <a
-              href="#catalog"
-              onClick={() => handleSelectGlobalPayment('kaspi')}
-              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 border-b-2 border-b-blue-600 dark:border-b-blue-400 shadow-xs hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all inline-flex items-center gap-1.5 group active:scale-95"
-            >
-              <span>Рассрочка Kaspi и Halyk (0-0-12 / 0-0-24)</span>
-              <ChevronDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
-            </a>
-
-            <a
-              href="#catalog"
-              onClick={() => handleSelectGlobalPayment('promo')}
-              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 border-b-2 border-b-blue-600 dark:border-b-blue-400 shadow-xs hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all inline-flex items-center gap-1.5 group active:scale-95"
-            >
-              <span>Специальные акционные цены</span>
-              <ChevronDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
-            </a>
-
-            <a
-              href="#catalog"
-              onClick={() => handleSelectGlobalPayment('cash')}
-              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 border-b-2 border-b-blue-600 dark:border-b-blue-400 shadow-xs hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all inline-flex items-center gap-1.5 group active:scale-95"
-            >
-              <span>Максимальная скидка за наличную оплату</span>
-              <ChevronDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
-            </a>
-
-            <a
-              href="#trade-in"
-              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121622] border border-slate-200 dark:border-white/10 border-b-2 border-b-blue-600 dark:border-b-blue-400 shadow-xs hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all inline-flex items-center gap-1.5 group active:scale-95 text-amber-800 dark:text-amber-300"
-            >
-              <span>Программа Trade-In (обмен)</span>
-              <ChevronDown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
-            </a>
-          </div>
-        </section>
-
-        {/* 3. MESSENGERS BAR (RESPONSIVE TABLET/MOBILE LAYOUT — NO SQUEEZING) */}
-        <section className="bg-white dark:bg-[#121622] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                Прямая связь и каталог Б/У техники
-              </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#229ED9] dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800 whitespace-nowrap">
-                Telegram: только Б/У
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl">
-              Новая техника в WhatsApp с моментальной консультацией, а свежие поступления проверенной Б/У техники — в Telegram.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 shrink-0 w-full lg:w-auto">
-            <a
-              href={`https://wa.me/${SITE_INFO.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#25D366] hover:bg-[#20ba59] transition-all shadow-sm"
-            >
-              <MessageCircle className="w-4 h-4 fill-current" />
-              <span>WhatsApp</span>
-            </a>
-
-            <a
-              href={`https://t.me/${SITE_INFO.telegram}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#229ED9] hover:bg-[#1e8ec3] transition-all shadow-sm"
-            >
-              <Send className="w-4 h-4" />
-              <span>Каталог Б/У ↗</span>
-            </a>
-
-            <a
-              href={SITE_INFO.gis}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-[#181d2a] dark:hover:bg-[#202738] transition-all border border-slate-200 dark:border-white/10"
-            >
-              <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>2ГИС Алматы</span>
-            </a>
-          </div>
-        </section>
-
-        {/* TRADE-IN BANNER & HIGHLIGHT */}
-        <section id="trade-in" className="scroll-mt-20 p-4 sm:p-5 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-amber-950/30 border border-amber-300/60 dark:border-amber-700/40 shadow-xs">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-            <div className="flex items-center gap-3.5 sm:gap-4 text-center sm:text-left min-w-0">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
-                <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-900 dark:text-white leading-snug">
-                Обменяйте старый iPhone на любую новую технику с доплатой
-              </h2>
-            </div>
-
-            <a
-              href="https://bylance.kz/trade-in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 whitespace-nowrap"
-            >
-              <ExternalLink className="w-4 h-4 shrink-0" />
-              <span>Онлайн-оценка на сайте ↗</span>
-            </a>
-          </div>
-        </section>
-
         {/* ====================================================================== */}
-        {/* 4. CHOOSE PAYMENT METHOD (GLOBAL SWITCHER)                             */}
-        {/* ====================================================================== */}
-        <section id="payment-methods" className="space-y-3 scroll-mt-20">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <span className="text-xs font-bold text-[#5B0601] dark:text-rose-400 uppercase tracking-wider">
-                Калькуляция цен
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
-                Основной способ оплаты для каталога
-              </h2>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Вы также можете выбрать отдельный способ оплаты для каждого товара индивидуально
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {PAYMENT_METHODS.map((method) => {
-              const isSelected = globalPayment === method.id;
-              return (
-                <button
-                  key={method.id}
-                  type="button"
-                  onClick={() => handleSelectGlobalPayment(method.id)}
-                  className={`p-4 rounded-2xl text-left transition-all border relative flex flex-col justify-between ${
-                    isSelected
-                      ? method.id === 'cash'
-                        ? 'bg-white dark:bg-[#151c2e] border-emerald-600 dark:border-emerald-400 shadow-md ring-2 ring-emerald-500/30'
-                        : 'bg-white dark:bg-[#151c2e] border-[#5B0601] dark:border-white shadow-md ring-2 ring-[#5B0601]/20 dark:ring-white/20'
-                      : 'bg-white dark:bg-[#121622] border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 p-1 flex items-center justify-center border border-slate-200/50 dark:border-white/5 shrink-0">
-                        <PaymentMethodIcon method={method.id} className="w-6 h-6" />
-                      </div>
-                      <span
-                        className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                          isSelected
-                            ? method.id === 'cash'
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
-                            : method.id === 'cash'
-                              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
-                              : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400'
-                        }`}
-                      >
-                        {method.badge}
-                      </span>
-                    </div>
-                    <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
-                        isSelected
-                          ? method.id === 'cash'
-                            ? 'border-emerald-600 bg-emerald-600 text-white'
-                            : 'border-[#5B0601] bg-[#5B0601] text-white dark:border-white dark:bg-white dark:text-slate-900'
-                          : 'border-slate-300 dark:border-white/20'
-                      }`}
-                    >
-                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className={`font-extrabold text-sm sm:text-base leading-tight mb-1 ${
-                      method.id === 'cash'
-                        ? 'text-emerald-700 dark:text-emerald-400'
-                        : 'text-slate-900 dark:text-white'
-                    }`}>
-                      {method.name}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
-                      {method.description}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ====================================================================== */}
-        {/* 5. CATALOG CATEGORY TABS & SEARCH                                      */}
+        {/* 1. CATALOG SECTION (IMMEDIATELY VISIBLE ON FIRST SCREEN)                */}
         {/* ====================================================================== */}
         <section id="catalog" className="space-y-4 scroll-mt-20">
           
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
+          {/* Top Compact Catalog Header: Trust badge, Title & Search */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
             <div>
-              <span className="text-xs font-bold text-[#5B0601] dark:text-rose-400 uppercase tracking-wider">
-                Каталог
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Устройства в наличии
-              </h2>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold mb-1.5 border border-emerald-200 dark:border-emerald-800/60 shadow-xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>100% Оригинальная техника с официальной гарантией 1 год</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Каталог устройств в наличии
+              </h1>
             </div>
 
-            {/* Search Input */}
+            {/* Fast Search Input */}
             <div className="relative w-full md:w-80">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -1017,7 +809,7 @@ export default function App() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Поиск по названию модели..."
-                className="w-full pl-9 pr-8 py-2.5 rounded-xl text-xs sm:text-sm bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B0601]/20 dark:focus:ring-white/20"
+                className="w-full pl-9 pr-8 py-2.5 rounded-xl text-xs sm:text-sm bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B0601]/20 dark:focus:ring-white/20 shadow-xs"
               />
               {searchQuery && (
                 <button
@@ -1029,6 +821,48 @@ export default function App() {
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Quick Payment Mode Selector Pills + Trade-in Link */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1 pb-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0 mr-1">
+                Цены в каталоге:
+              </span>
+              {PAYMENT_METHODS.map((m) => {
+                const isSelected = globalPayment === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => handleSelectGlobalPayment(m.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 active:scale-95 ${
+                      isSelected
+                        ? m.id === 'cash'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-[#5B0601] text-white border-[#5B0601] dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
+                        : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
+                    }`}
+                  >
+                    <PaymentMethodIcon method={m.id} className="w-3.5 h-3.5" />
+                    <span>{m.name}</span>
+                    {m.id === 'cash' && (
+                      <span className="text-[10px] px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-extrabold ml-0.5">
+                        Скидка
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <a
+              href="#trade-in"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 shrink-0 shadow-2xs"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>Есть Trade-In iPhone ↓</span>
+            </a>
           </div>
 
           {/* Category Tabs (Visible on all screens with horizontal scroll) */}
@@ -1348,6 +1182,167 @@ export default function App() {
               })}
             </div>
           )}
+        </section>
+
+        {/* ====================================================================== */}
+        {/* TRADE-IN BANNER & HIGHLIGHT                                            */}
+        {/* ====================================================================== */}
+        <section id="trade-in" className="scroll-mt-20 p-4 sm:p-5 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-amber-950/30 border border-amber-300/60 dark:border-amber-700/40 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+            <div className="flex items-center gap-3.5 sm:gap-4 text-center sm:text-left min-w-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-900 dark:text-white leading-snug">
+                Обменяйте старый iPhone на любую новую технику с доплатой
+              </h2>
+            </div>
+
+            <a
+              href="https://bylance.kz/trade-in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 whitespace-nowrap"
+            >
+              <ExternalLink className="w-4 h-4 shrink-0" />
+              <span>Онлайн-оценка на сайте ↗</span>
+            </a>
+          </div>
+        </section>
+
+        {/* ====================================================================== */}
+        {/* DETAILED PAYMENT METHODS (KASPI, HALYK, PROMO, CASH)                   */}
+        {/* ====================================================================== */}
+        <section id="payment-methods" className="space-y-3 scroll-mt-20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-xs font-bold text-[#5B0601] dark:text-rose-400 uppercase tracking-wider">
+                Калькуляция цен
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
+                Программы оплаты и рассрочки
+              </h2>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Нажмите на нужную программу, чтобы пересчитать цены в каталоге
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {PAYMENT_METHODS.map((method) => {
+              const isSelected = globalPayment === method.id;
+              return (
+                <button
+                  key={method.id}
+                  type="button"
+                  onClick={() => handleSelectGlobalPayment(method.id)}
+                  className={`p-4 rounded-2xl text-left transition-all border relative flex flex-col justify-between ${
+                    isSelected
+                      ? method.id === 'cash'
+                        ? 'bg-white dark:bg-[#151c2e] border-emerald-600 dark:border-emerald-400 shadow-md ring-2 ring-emerald-500/30'
+                        : 'bg-white dark:bg-[#151c2e] border-[#5B0601] dark:border-white shadow-md ring-2 ring-[#5B0601]/20 dark:ring-white/20'
+                      : 'bg-white dark:bg-[#121622] border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 p-1 flex items-center justify-center border border-slate-200/50 dark:border-white/5 shrink-0">
+                        <PaymentMethodIcon method={method.id} className="w-6 h-6" />
+                      </div>
+                      <span
+                        className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                          isSelected
+                            ? method.id === 'cash'
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
+                            : method.id === 'cash'
+                              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                              : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        {method.badge}
+                      </span>
+                    </div>
+                    <div
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
+                        isSelected
+                          ? method.id === 'cash'
+                            ? 'border-emerald-600 bg-emerald-600 text-white'
+                            : 'border-[#5B0601] bg-[#5B0601] text-white dark:border-white dark:bg-white dark:text-slate-900'
+                          : 'border-slate-300 dark:border-white/20'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className={`font-extrabold text-sm sm:text-base leading-tight mb-1 ${
+                      method.id === 'cash'
+                        ? 'text-emerald-700 dark:text-emerald-400'
+                        : 'text-slate-900 dark:text-white'
+                    }`}>
+                      {method.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
+                      {method.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ====================================================================== */}
+        {/* MESSENGERS BAR (RESPONSIVE TABLET/MOBILE LAYOUT — NO SQUEEZING)        */}
+        {/* ====================================================================== */}
+        <section className="bg-white dark:bg-[#121622] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                Прямая связь и каталог Б/У техники
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#229ED9] dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800 whitespace-nowrap">
+                Telegram: только Б/У
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl">
+              Новая техника в WhatsApp с моментальной консультацией, а свежие поступления проверенной Б/У техники — в Telegram.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 shrink-0 w-full lg:w-auto">
+            <a
+              href={`https://wa.me/${SITE_INFO.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#25D366] hover:bg-[#20ba59] transition-all shadow-sm"
+            >
+              <MessageCircle className="w-4 h-4 fill-current" />
+              <span>WhatsApp</span>
+            </a>
+
+            <a
+              href={`https://t.me/${SITE_INFO.telegram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#229ED9] hover:bg-[#1e8ec3] transition-all shadow-sm"
+            >
+              <Send className="w-4 h-4" />
+              <span>Каталог Б/У ↗</span>
+            </a>
+
+            <a
+              href={SITE_INFO.gis}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-[#181d2a] dark:hover:bg-[#202738] transition-all border border-slate-200 dark:border-white/10"
+            >
+              <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>2ГИС Алматы</span>
+            </a>
+          </div>
         </section>
 
         {/* ====================================================================== */}
