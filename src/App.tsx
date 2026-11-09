@@ -21,7 +21,8 @@ import {
   Zap,
   ExternalLink,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
 import {
   SITE_INFO,
@@ -31,18 +32,20 @@ import {
   MainCategory,
   ProductModel,
   ProductVariant,
+  ProductColor,
   PRODUCT_MODELS,
   formatPrice
 } from './data/prices';
 import { KaspiIcon, HalykIcon, PaymentMethodIcon } from './components/PaymentIcons';
 
-// Cart Item interface: stores specific variant + chosen payment method
+// Cart Item interface: stores specific variant + chosen payment method + color
 interface CartItem {
   variantId: string;
   modelId: string;
   modelName: string;
   fullName: string;
   image: string;
+  colorName?: string;
   paymentMethod: PaymentMethodId;
   quantity: number;
   prices: ProductVariant['prices'];
@@ -166,25 +169,53 @@ const FAQ_LIST: FaqItem[] = [
 ];
 
 export default function App() {
-  // 1. THEME STATE
+  // 1. THEME STATE (SYSTEM-AWARE BY DEFAULT + MANUAL TOGGLE)
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('bylance_theme');
-      return saved ? saved === 'dark' : false;
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // If phone/device is set to dark mode, immediately render in dark mode!
+      if (prefersDark) return true;
+      const manual = localStorage.getItem('bylance_manual_theme');
+      if (manual === 'dark') return true;
+      if (manual === 'light') return false;
+      return false;
     }
     return false;
   });
 
+  // Real-time synchronization with OS system dark/light mode
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleSystemChange = (e: MediaQueryListEvent) => {
+      // Whenever system theme toggles on phone/OS, immediately update!
+      setIsDark(e.matches);
+      localStorage.removeItem('bylance_manual_theme');
+    };
+
+    mql.addEventListener('change', handleSystemChange);
+    return () => mql.removeEventListener('change', handleSystemChange);
+  }, []);
+
+  // Sync DOM with isDark
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) {
       root.classList.add('dark');
-      localStorage.setItem('bylance_theme', 'dark');
     } else {
       root.classList.remove('dark');
-      localStorage.setItem('bylance_theme', 'light');
     }
   }, [isDark]);
+
+  // Handler for toggle button
+  const handleToggleTheme = () => {
+    setIsDark((prev) => {
+      const next = !prev;
+      localStorage.setItem('bylance_manual_theme', next ? 'dark' : 'light');
+      return next;
+    });
+  };
 
   // 2. GLOBAL PAYMENT METHOD
   const [globalPayment, setGlobalPayment] = useState<PaymentMethodId>(() => {
@@ -202,8 +233,9 @@ export default function App() {
     localStorage.setItem('bylance_payment_method', method);
   }, []);
 
-  // Per-card selections: modelId -> { simType?, storage?, size?, paymentMethod? }
+  // Per-card selections: modelId -> { colorId?, simType?, storage?, size?, paymentMethod? }
   const [cardSelections, setCardSelections] = useState<Record<string, {
+    colorId?: string;
     simType?: 'ESIM' | 'SIM';
     storage?: string;
     size?: string;
@@ -237,15 +269,19 @@ export default function App() {
     }
   }, [cart]);
 
-  // Add variant to cart with specific payment method
+  // Add variant to cart with specific payment method and selected color
   const addToCart = useCallback((
     model: ProductModel,
     variant: ProductVariant,
-    itemPaymentMethod: PaymentMethodId
+    itemPaymentMethod: PaymentMethodId,
+    chosenColor?: ProductColor
   ) => {
     setCart((prev) => {
+      const colorLabel = chosenColor ? ` (${chosenColor.name})` : '';
       const existingIndex = prev.findIndex(
-        (item) => item.variantId === variant.id && item.paymentMethod === itemPaymentMethod
+        (item) => item.variantId === variant.id &&
+                  item.paymentMethod === itemPaymentMethod &&
+                  item.colorName === (chosenColor ? chosenColor.name : undefined)
       );
 
       if (existingIndex > -1) {
@@ -261,8 +297,9 @@ export default function App() {
         variantId: variant.id,
         modelId: model.id,
         modelName: model.name,
-        fullName: variant.fullName,
-        image: model.image,
+        fullName: variant.fullName + colorLabel,
+        image: chosenColor?.image || model.image,
+        colorName: chosenColor?.name,
         paymentMethod: itemPaymentMethod,
         quantity: 1,
         prices: variant.prices,
@@ -408,6 +445,7 @@ export default function App() {
   const updateCardSelection = useCallback((
     modelId: string,
     updates: Partial<{
+      colorId: string;
       simType: 'ESIM' | 'SIM';
       storage: string;
       size: string;
@@ -427,7 +465,8 @@ export default function App() {
   const handleOrderNowWhatsApp = useCallback((
     model: ProductModel,
     variant: ProductVariant,
-    methodId: PaymentMethodId
+    methodId: PaymentMethodId,
+    chosenColor?: ProductColor
   ) => {
     const methodObj = PAYMENT_METHODS.find((m) => m.id === methodId) || PAYMENT_METHODS[2];
     const priceVal = variant.prices[methodId];
@@ -435,17 +474,24 @@ export default function App() {
       ? formatPrice(priceVal)
       : 'Цена по запросу';
 
-    const text = [
+    const textLines = [
       `Здравствуйте! Хочу оформить заказ в ${SITE_INFO.shopName}:`,
       ``,
       `• Модель: ${variant.fullName}`,
+    ];
+
+    if (chosenColor) {
+      textLines.push(`• Цвет: ${chosenColor.name}`);
+    }
+
+    textLines.push(
       `• Способ оплаты: ${methodObj.name}`,
       `• Цена: ${priceStr}`,
       ``,
       `Подскажите, есть ли в наличии и как оформить доставку/самовывоз?`
-    ].join('\n');
+    );
 
-    const url = `https://wa.me/${SITE_INFO.whatsapp}?text=${encodeURIComponent(text)}`;
+    const url = `https://wa.me/${SITE_INFO.whatsapp}?text=${encodeURIComponent(textLines.join('\n'))}`;
     window.open(url, '_blank');
   }, []);
 
@@ -534,8 +580,8 @@ export default function App() {
             </a>
           </div>
 
-          {/* Top Header Navigation (Catalog, FAQ, and Contacts as icon) */}
-          <nav className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+          {/* Top Header Navigation */}
+          <nav className="flex items-center gap-1.5 sm:gap-3 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
             <a
               href="#catalog"
               className="py-1 px-2 rounded-lg hover:text-[#5B0601] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
@@ -552,11 +598,9 @@ export default function App() {
             <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
             <a
               href="#contacts"
-              aria-label="Контакты магазина в Алматы"
-              title="Контакты в Алматы"
-              className="p-1.5 sm:p-2 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors flex items-center justify-center"
+              className="py-1 px-2 rounded-lg hover:text-[#5B0601] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             >
-              <MapPin className="w-4 h-4" />
+              О нас
             </a>
           </nav>
 
@@ -565,8 +609,9 @@ export default function App() {
             
             {/* Theme Toggle */}
             <button
-              onClick={() => setIsDark(!isDark)}
+              onClick={handleToggleTheme}
               aria-label="Сменить тему"
+              title={isDark ? "Переключить на светлую тему" : "Переключить на тёмную тему"}
               className="p-2 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             >
               {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-[#5B0601]" />}
@@ -723,11 +768,12 @@ export default function App() {
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold">Обмен</span>
               </a>
               <a
-                href="#payment-methods"
+                href="#founder"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-rose-700 dark:text-rose-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-between"
               >
-                Способы оплаты (Kaspi / Halyk)
+                <span>Аружан Жеткерген</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300 font-bold">Основательница</span>
               </a>
               <a
                 href="#faq"
@@ -823,46 +869,63 @@ export default function App() {
             </div>
           </div>
 
-          {/* Quick Payment Mode Selector Pills + Trade-in Link */}
-          <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1 pb-1">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0 mr-1">
-                Цены в каталоге:
-              </span>
-              {PAYMENT_METHODS.map((m) => {
-                const isSelected = globalPayment === m.id;
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => handleSelectGlobalPayment(m.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 active:scale-95 ${
-                      isSelected
-                        ? m.id === 'cash'
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                          : 'bg-[#5B0601] text-white border-[#5B0601] dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
-                        : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
-                    }`}
-                  >
-                    <PaymentMethodIcon method={m.id} className="w-3.5 h-3.5" />
-                    <span>{m.name}</span>
-                    {m.id === 'cash' && (
-                      <span className="text-[10px] px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-extrabold ml-0.5">
-                        Скидка
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+          {/* TRADE-IN BANNER & HIGHLIGHT (UP AT TOP) */}
+          <div id="trade-in" className="scroll-mt-20 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-amber-950/30 border border-amber-300/60 dark:border-amber-700/40 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3 text-center sm:text-left min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-xs sm:text-sm md:text-base font-black text-slate-900 dark:text-white leading-snug">
+                  Обменяйте старый iPhone на любую новую технику с доплатой
+                </h2>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Принимаются только Apple iPhone · Онлайн-оценка за 5 минут у сотрудника
+                </p>
+              </div>
             </div>
 
             <a
-              href="#trade-in"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 shrink-0 shadow-2xs"
+              href="https://bylance.kz/trade-in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-all active:scale-95 whitespace-nowrap"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>Есть Trade-In iPhone ↓</span>
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+              <span>Онлайн-оценка на сайте ↗</span>
             </a>
+          </div>
+
+          {/* Quick Global Payment Mode Selector Pills (Switches all catalog prices) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0 mr-1">
+              Цены в каталоге:
+            </span>
+            {PAYMENT_METHODS.map((m) => {
+              const isSelected = globalPayment === m.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => handleSelectGlobalPayment(m.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 active:scale-95 ${
+                    isSelected
+                      ? m.id === 'cash'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                        : 'bg-[#5B0601] text-white border-[#5B0601] dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
+                      : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
+                  }`}
+                >
+                  <PaymentMethodIcon method={m.id} className="w-3.5 h-3.5" />
+                  <span>{m.name}</span>
+                  {m.id === 'cash' && (
+                    <span className="text-[10px] px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-extrabold ml-0.5">
+                      Скидка
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Category Tabs (Visible on all screens with horizontal scroll) */}
@@ -963,6 +1026,8 @@ export default function App() {
                 const activeSim = sel.simType || (model.simOptions ? model.simOptions[0] : undefined);
                 const activeStorage = sel.storage || (model.storageOptions ? model.storageOptions[0] : undefined);
                 const activeSize = sel.size || (model.sizeOptions ? model.sizeOptions[0] : undefined);
+                const activeColor = model.colorOptions?.find((c) => c.id === sel.colorId) || model.colorOptions?.[0];
+                const displayImage = activeColor?.image || model.image;
 
                 return (
                   <div
@@ -973,7 +1038,7 @@ export default function App() {
                       {/* Product Studio Photo Container */}
                       <div className="w-full aspect-square bg-[#f5f6f8] dark:bg-[#181d2a] p-4 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-white/5">
                         <ProductImage
-                          src={model.image}
+                          src={displayImage}
                           alt={model.name}
                           className="w-full h-full object-contain rounded-2xl mix-blend-multiply dark:mix-blend-normal group-hover:scale-105 transition-transform duration-300"
                         />
@@ -996,6 +1061,56 @@ export default function App() {
                             {model.name}
                           </h3>
                         </div>
+
+                        {/* SELECTOR: COLOR SELECTION WITH MINI PICTURE THUMBNAILS */}
+                        {model.colorOptions && model.colorOptions.length > 0 && (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between text-[11px]">
+                              <span className="font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                Цвет:
+                              </span>
+                              <span className="font-bold text-slate-900 dark:text-white truncate ml-2">
+                                {activeColor?.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                              {model.colorOptions.map((col) => {
+                                const isColSel = activeColor?.id === col.id;
+                                return (
+                                  <button
+                                    key={col.id}
+                                    type="button"
+                                    onClick={() => updateCardSelection(model.id, { colorId: col.id })}
+                                    title={col.name}
+                                    className={`group/color relative p-0.5 rounded-xl border-2 transition-all flex items-center justify-center shrink-0 active:scale-95 ${
+                                      isColSel
+                                        ? 'border-[#5B0601] dark:border-rose-400 ring-2 ring-[#5B0601]/25 dark:ring-rose-400/30 scale-105 shadow-xs'
+                                        : 'border-slate-200/90 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/30'
+                                    }`}
+                                  >
+                                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-[#1a2030] flex items-center justify-center relative">
+                                      <img
+                                        src={col.image}
+                                        alt={col.name}
+                                        loading="lazy"
+                                        className="w-full h-full object-cover transition-transform group-hover/color:scale-110"
+                                        onError={(e) => {
+                                          (e.currentTarget as HTMLElement).style.display = 'none';
+                                        }}
+                                      />
+                                      {col.hex && (
+                                        <span
+                                          className="w-3 h-3 rounded-full border border-black/15 dark:border-white/20 absolute bottom-0.5 right-0.5 shadow-xs pointer-events-none"
+                                          style={{ backgroundColor: col.hex }}
+                                        />
+                                      )}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
 
                         {/* SELECTOR 1: SIM TYPE */}
                         {model.simOptions && model.simOptions.length > 0 && (
@@ -1081,40 +1196,40 @@ export default function App() {
                           </div>
                         )}
 
-                        {/* SELECTOR 4: INDIVIDUAL PAYMENT METHOD */}
-                        <div className="space-y-1.5 pt-1">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                            Оплата для этого товара:
-                          </span>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {PAYMENT_METHODS.map((pm) => {
-                              const isSel = itemPayment === pm.id;
-                              return (
-                                <button
-                                  key={pm.id}
-                                  type="button"
-                                  onClick={() => updateCardSelection(model.id, { paymentMethod: pm.id })}
-                                  className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 truncate ${
-                                    isSel
-                                      ? pm.id === 'cash'
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-500 shadow-xs'
-                                        : 'bg-rose-50 text-[#5B0601] border-[#5B0601] dark:bg-rose-950/60 dark:text-rose-200 dark:border-rose-700'
-                                      : 'bg-slate-50 dark:bg-[#181d2a] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300'
-                                  }`}
-                                >
-                                  <PaymentMethodIcon method={pm.id} className="w-3.5 h-3.5 shrink-0" />
-                                  <span className="truncate">{pm.shortLabel}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
                       </div>
                     </div>
 
-                    {/* Bottom: Active Variant Price + 2 ACTION BUTTONS */}
-                    <div className="p-4 sm:p-5 pt-3 border-t border-slate-100 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-[#141926]/50">
+                    {/* Bottom: Payment Selector + Active Variant Price + 2 ACTION BUTTONS (Pinned at same height on every card) */}
+                    <div className="p-4 sm:p-5 pt-3.5 border-t border-slate-100 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-[#141926]/50 mt-auto">
+                      
+                      {/* SELECTOR 4: INDIVIDUAL PAYMENT METHOD (ALWAYS PINNED TO BOTTOM ROW) */}
+                      <div className="space-y-1.5">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                          Оплата для этого товара:
+                        </span>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {PAYMENT_METHODS.map((pm) => {
+                            const isSel = itemPayment === pm.id;
+                            return (
+                              <button
+                                key={pm.id}
+                                type="button"
+                                onClick={() => updateCardSelection(model.id, { paymentMethod: pm.id })}
+                                className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 truncate ${
+                                  isSel
+                                    ? pm.id === 'cash'
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-500 shadow-xs'
+                                      : 'bg-rose-50 text-[#5B0601] border-[#5B0601] dark:bg-rose-950/60 dark:text-rose-200 dark:border-rose-700'
+                                    : 'bg-white dark:bg-[#181d2a] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300'
+                                }`}
+                              >
+                                <PaymentMethodIcon method={pm.id} className="w-3.5 h-3.5 shrink-0" />
+                                <span className="truncate">{pm.shortLabel}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                       <div>
                         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                           <span className="font-medium truncate">{activeVariant.fullName}</span>
@@ -1154,7 +1269,7 @@ export default function App() {
                         {/* Button 1: Order Now Directly via WhatsApp */}
                         <button
                           type="button"
-                          onClick={() => handleOrderNowWhatsApp(model, activeVariant, itemPayment)}
+                          onClick={() => handleOrderNowWhatsApp(model, activeVariant, itemPayment, activeColor)}
                           className="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#25D366] hover:bg-[#20ba59] transition-all shadow-sm flex items-center justify-center gap-2 active:scale-[0.99]"
                         >
                           <Zap className="w-4 h-4 fill-current" />
@@ -1164,7 +1279,7 @@ export default function App() {
                         {/* Button 2: Add to multi-product Cart */}
                         <button
                           type="button"
-                          onClick={() => addToCart(model, activeVariant, itemPayment)}
+                          onClick={() => addToCart(model, activeVariant, itemPayment, activeColor)}
                           className="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-slate-800 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-[#1e2436] dark:hover:bg-[#283149] transition-all border border-slate-200 dark:border-white/10 flex items-center justify-center gap-2 active:scale-[0.99]"
                         >
                           <ShoppingCart className="w-4 h-4 text-[#5B0601] dark:text-white" />
@@ -1185,112 +1300,168 @@ export default function App() {
         </section>
 
         {/* ====================================================================== */}
-        {/* TRADE-IN BANNER & HIGHLIGHT                                            */}
+        {/* FOUNDER & STORE STORY: АРУЖАН ЖЕТКЕРГЕН                                */}
         {/* ====================================================================== */}
-        <section id="trade-in" className="scroll-mt-20 p-4 sm:p-5 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-amber-950/30 border border-amber-300/60 dark:border-amber-700/40 shadow-xs">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-            <div className="flex items-center gap-3.5 sm:gap-4 text-center sm:text-left min-w-0">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
-                <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-900 dark:text-white leading-snug">
-                Обменяйте старый iPhone на любую новую технику с доплатой
-              </h2>
-            </div>
-
-            <a
-              href="https://bylance.kz/trade-in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 whitespace-nowrap"
-            >
-              <ExternalLink className="w-4 h-4 shrink-0" />
-              <span>Онлайн-оценка на сайте ↗</span>
-            </a>
-          </div>
-        </section>
-
         {/* ====================================================================== */}
-        {/* DETAILED PAYMENT METHODS (KASPI, HALYK, PROMO, CASH)                   */}
+        {/* FOUNDER & STORE STORY: АРУЖАН ЖЕТКЕРГЕН                                */}
         {/* ====================================================================== */}
-        <section id="payment-methods" className="space-y-3 scroll-mt-20">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <span className="text-xs font-bold text-[#5B0601] dark:text-rose-400 uppercase tracking-wider">
-                Калькуляция цен
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
-                Программы оплаты и рассрочки
-              </h2>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Нажмите на нужную программу, чтобы пересчитать цены в каталоге
-            </p>
-          </div>
+        <section id="founder" className="scroll-mt-20 rounded-3xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 p-5 sm:p-7 shadow-xs">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-6">
+            
+            {/* PHOTO FIELD WITH LUXURY GRADIENT EFFECT */}
+            <div className="relative group shrink-0 self-center lg:self-start">
+              {/* Outer Radiant Ambient Gradient Glow */}
+              <div className="absolute -inset-2 bg-gradient-to-tr from-[#5B0601]/40 via-rose-500/35 via-amber-400/30 to-[#229ED9]/35 rounded-[32px] blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {PAYMENT_METHODS.map((method) => {
-              const isSelected = globalPayment === method.id;
-              return (
-                <button
-                  key={method.id}
-                  type="button"
-                  onClick={() => handleSelectGlobalPayment(method.id)}
-                  className={`p-4 rounded-2xl text-left transition-all border relative flex flex-col justify-between ${
-                    isSelected
-                      ? method.id === 'cash'
-                        ? 'bg-white dark:bg-[#151c2e] border-emerald-600 dark:border-emerald-400 shadow-md ring-2 ring-emerald-500/30'
-                        : 'bg-white dark:bg-[#151c2e] border-[#5B0601] dark:border-white shadow-md ring-2 ring-[#5B0601]/20 dark:ring-white/20'
-                      : 'bg-white dark:bg-[#121622] border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 p-1 flex items-center justify-center border border-slate-200/50 dark:border-white/5 shrink-0">
-                        <PaymentMethodIcon method={method.id} className="w-6 h-6" />
-                      </div>
-                      <span
-                        className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                          isSelected
-                            ? method.id === 'cash'
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
-                            : method.id === 'cash'
-                              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
-                              : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400'
-                        }`}
-                      >
-                        {method.badge}
+              {/* Iridescent Gradient Border Ring */}
+              <div className="p-1 rounded-[28px] bg-gradient-to-tr from-[#5B0601] via-rose-500 via-amber-400 to-[#229ED9] shadow-xl">
+                {/* Photo Container Frame */}
+                <div className="relative w-40 h-52 sm:w-48 sm:h-60 md:w-52 md:h-64 rounded-[24px] overflow-hidden bg-gradient-to-b from-slate-900 to-black flex items-center justify-center">
+                  
+                  {/* Founder Photo Image with Graceful Stylized Fallback */}
+                  <img
+                    src={SITE_INFO.founder?.image || '/aruzhan.jpg'}
+                    alt={SITE_INFO.founder?.name || 'Аружан Жеткерген'}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                      const fallback = document.getElementById('founder-gradient-avatar');
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+
+                  {/* Stylized Gradient Avatar Fallback (when local photo file is not yet placed) */}
+                  <div
+                    id="founder-gradient-avatar"
+                    className="absolute inset-0 hidden flex-col items-center justify-center p-4 text-center bg-gradient-to-tr from-[#5B0601] via-rose-950 to-slate-900 text-white"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-400 via-rose-500 to-[#5B0601] flex items-center justify-center text-white font-black text-2xl shadow-lg ring-2 ring-white/20 mb-2">
+                      АЖ
+                    </div>
+                    <span className="text-xs font-black tracking-tight">Аружан Жеткерген</span>
+                    <span className="text-[10px] text-amber-300 font-bold mt-0.5">@zaagaru</span>
+                  </div>
+
+                  {/* Aesthetic Bottom Gradient Fade */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent pointer-events-none" />
+
+                  {/* Floating Identity Badge on Photo */}
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 pointer-events-none">
+                    <div className="px-2.5 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-center shadow-xs">
+                      <span className="text-[11px] font-black text-white block leading-tight truncate">
+                        {SITE_INFO.founder?.name || 'Аружан Жеткерген'}
+                      </span>
+                      <span className="text-[9px] text-amber-300 font-extrabold uppercase tracking-wider block mt-0.5">
+                        Основательница Bylance
                       </span>
                     </div>
-                    <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
-                        isSelected
-                          ? method.id === 'cash'
-                            ? 'border-emerald-600 bg-emerald-600 text-white'
-                            : 'border-[#5B0601] bg-[#5B0601] text-white dark:border-white dark:bg-white dark:text-slate-900'
-                          : 'border-slate-300 dark:border-white/20'
-                      }`}
-                    >
-                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                    </div>
                   </div>
 
-                  <div>
-                    <h3 className={`font-extrabold text-sm sm:text-base leading-tight mb-1 ${
-                      method.id === 'cash'
-                        ? 'text-emerald-700 dark:text-emerald-400'
-                        : 'text-slate-900 dark:text-white'
-                    }`}>
-                      {method.name}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
-                      {method.description}
-                    </p>
+                </div>
+              </div>
+            </div>
+
+            {/* BIO & TEXT INFO */}
+            <div className="space-y-3.5 flex-1 min-w-0 text-center sm:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-[#5B0601] dark:text-rose-300 text-xs font-bold border border-rose-200 dark:border-rose-900/50">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Основательница магазина Bylance</span>
+              </div>
+
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  Аружан Жеткерген
+                </h2>
+                <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                  Казахстанский блогер и предпринимательница (Алматы & Астана)
+                </p>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+                Основательница магазина <strong className="text-slate-900 dark:text-white font-bold">@bylance_kz</strong>, который уже более трех лет специализируется на продаже оригинальной техники брендов Apple и Dyson. В социальных сетях Аружан делится честными обзорами гаджетов, бэкстейджами ведения бизнеса, лайфстайлом и путешествиями.
+              </p>
+
+              {/* Stats badges (100% оригинал Apple & Dyson REMOVED as requested) */}
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 dark:bg-[#181d2a] border border-slate-200/80 dark:border-white/10 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span>Более 3 лет в бизнесе</span>
+                </div>
+                <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 dark:bg-[#181d2a] border border-slate-200/80 dark:border-white/10 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  360 000+ подписчиков
+                </div>
+              </div>
+            </div>
+
+            {/* Social Cards / Links */}
+            <div className="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 min-w-[270px]">
+              <a
+                href="https://www.tiktok.com/@_zaag_"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-[#181d2a] hover:bg-slate-100 dark:hover:bg-[#1e2536] border border-slate-200 dark:border-white/10 transition-all group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center font-black text-xs">
+                    TT
                   </div>
-                </button>
-              );
-            })}
+                  <div className="text-left">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block group-hover:text-blue-600 transition-colors">
+                      TikTok @_zaag_ ↗
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      280 000+ подписчиков
+                    </span>
+                  </div>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors" />
+              </a>
+
+              <a
+                href="https://www.instagram.com/zaagaru"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-[#181d2a] hover:bg-slate-100 dark:hover:bg-[#1e2536] border border-slate-200 dark:border-white/10 transition-all group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center font-black text-xs">
+                    IG
+                  </div>
+                  <div className="text-left">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block group-hover:text-rose-600 transition-colors">
+                      Instagram @zaagaru ↗
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      80 000+ подписчиков
+                    </span>
+                  </div>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors" />
+              </a>
+
+              <a
+                href="https://www.instagram.com/bylance_kz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-[#181d2a] hover:bg-slate-100 dark:hover:bg-[#1e2536] border border-slate-200 dark:border-white/10 transition-all group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#5B0601] text-white flex items-center justify-center font-black text-xs">
+                    BY
+                  </div>
+                  <div className="text-left">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block group-hover:text-[#5B0601] transition-colors">
+                      Магазин @bylance_kz ↗
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Оригинал Apple & Dyson
+                    </span>
+                  </div>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors" />
+              </a>
+            </div>
+
           </div>
         </section>
 
@@ -1449,26 +1620,85 @@ export default function App() {
             })}
           </div>
 
-          {/* «ЕСЛИ ЕСТЬ ДРУГИЕ ВОПРОСЫ — ОБРАЩАЙТЕСЬ В WHATSAPP» */}
-          <div className="max-w-3xl mx-auto p-5 sm:p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center sm:text-left">
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
-                Остались другие вопросы по товару или покупке?
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                Напишите нам в WhatsApp — менеджер на связи ежедневно и ответит за 2 минуты!
-              </p>
+          {/* ВОПРОСЫ И БЫСТРЫЕ ССЫЛКИ: WHATSAPP, TELEGRAM, TRADE-IN */}
+          <div className="max-w-3xl mx-auto space-y-3 pt-2">
+            
+            {/* 1. WHATSAPP: Вопросы по товару или покупке */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+              <div className="space-y-1 text-center sm:text-left min-w-0">
+                <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                  Остались другие вопросы по товару или покупке?
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  Напишите нам в WhatsApp — менеджер на связи ежедневно и ответит за 2 минуты!
+                </p>
+              </div>
+
+              <a
+                href={`https://wa.me/${SITE_INFO.whatsapp}?text=${encodeURIComponent('Здравствуйте! У меня есть вопрос по покупке техники в Bylance.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 active:scale-95 whitespace-nowrap w-full sm:w-auto"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+                <span>Задать вопрос в WhatsApp</span>
+              </a>
             </div>
 
-            <a
-              href={`https://wa.me/${SITE_INFO.whatsapp}?text=${encodeURIComponent('Здравствуйте! У меня есть вопрос по покупке техники в Bylance.')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center gap-2 shrink-0 active:scale-95"
-            >
-              <MessageCircle className="w-4 h-4 fill-current" />
-              <span>Задать вопрос в WhatsApp</span>
-            </a>
+            {/* 2. TELEGRAM: Б/У техника и канал */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+              <div className="space-y-1 text-center sm:text-left min-w-0">
+                <div className="flex items-center justify-center sm:justify-start gap-2">
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                    Ищете проверенную Б/У технику или Trade-In?
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#229ED9] text-white whitespace-nowrap hidden sm:inline-block">
+                    Только Б/У
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  Подпишитесь на наш Telegram — публикуем свежие поступления Б/У iPhone и Dyson с реальными фото и АКБ!
+                </p>
+              </div>
+
+              <a
+                href={`https://t.me/${SITE_INFO.telegram}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 rounded-xl bg-[#229ED9] hover:bg-[#1e8ec3] text-white font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 active:scale-95 whitespace-nowrap w-full sm:w-auto"
+              >
+                <Send className="w-4 h-4" />
+                <span>Канал Б/У в Telegram ↗</span>
+              </a>
+            </div>
+
+            {/* 3. TRADE-IN: Обмен старого iPhone */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+              <div className="space-y-1 text-center sm:text-left min-w-0">
+                <div className="flex items-center justify-center sm:justify-start gap-2">
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                    Хотите обменять старый iPhone на новую технику с доплатой?
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white whitespace-nowrap hidden sm:inline-block">
+                    Trade-In
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  По программе Trade-In принимаются только Apple iPhone. Точную оценку сделает сотрудник в офисе или онлайн!
+                </p>
+              </div>
+
+              <a
+                href="https://bylance.kz/trade-in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 active:scale-95 whitespace-nowrap w-full sm:w-auto"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>Онлайн-оценка на сайте ↗</span>
+              </a>
+            </div>
+
           </div>
         </section>
 
@@ -1599,8 +1829,8 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4 text-xs font-semibold">
-            <a href="#payment-methods" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              Оплата
+            <a href="#founder" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+              Об основательнице
             </a>
             <a href="#faq" className="hover:text-slate-900 dark:hover:text-white transition-colors">
               FAQ
@@ -1748,6 +1978,11 @@ export default function App() {
                           <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-tight">
                             {item.fullName}
                           </h4>
+                          {item.colorName && (
+                            <div className="text-[11px] font-semibold text-rose-700 dark:text-rose-300 mt-0.5">
+                              Цвет: {item.colorName}
+                            </div>
+                          )}
                           <div className="text-[11px] text-slate-400 mt-0.5 whitespace-nowrap">
                             {unitPrice !== null && unitPrice !== undefined
                               ? `${formatPrice(unitPrice)} за шт.`

@@ -18,6 +18,14 @@ export const SITE_INFO = {
   address: "г. Алматы, пр. Абылай хана (точный адрес уточняйте в WhatsApp)",
   hours: "Ежедневно 10:00–20:00",
   roundTo: 1000,
+  founder: {
+    name: "Аружан Жеткерген",
+    role: "Основательница магазина Bylance",
+    image: "/aruzhan.jpg",
+    instagram: "zaagaru",
+    tiktok: "_zaag_",
+    shopInstagram: "bylance_kz",
+  },
 };
 
 // 2. ЧЕТЫРЕ СПОСОБА ОПЛАТЫ
@@ -97,7 +105,58 @@ export interface ProductVariant {
   };
 }
 
-// МОДЕЛЬ ТОВАРА (ГРУППА С ВЫБОРОМ ПАМЯТИ/SIM)
+// ЦВЕТ ТОВАРА (с мини-картинкой и плашкой)
+export interface ProductColor {
+  id: string;
+  name: string;
+  image: string;
+  hex?: string;
+}
+
+// ГОТОВЫЕ ЦВЕТОВЫЕ НАБОРЫ (пользователь может менять картинки на свои в любое время)
+export const IPHONE_PRO_COLORS: ProductColor[] = [
+  { id: 'desert', name: 'Desert Titanium (Пустынный)', hex: '#c5b39b', image: PRODUCT_IMAGES.iphone },
+  { id: 'natural', name: 'Natural Titanium (Натуральный)', hex: '#9f9b96', image: PRODUCT_IMAGES.iphone },
+  { id: 'white', name: 'White Titanium (Белый)', hex: '#f2f1ed', image: PRODUCT_IMAGES.iphone },
+  { id: 'black', name: 'Black Titanium (Чёрный)', hex: '#3b3b3d', image: PRODUCT_IMAGES.iphone },
+];
+
+export const IPHONE_BASE_COLORS: ProductColor[] = [
+  { id: 'ultramarine', name: 'Ultramarine (Ультрамарин)', hex: '#48638b', image: PRODUCT_IMAGES.iphone },
+  { id: 'teal', name: 'Teal (Бирюзовый)', hex: '#97baaf', image: PRODUCT_IMAGES.iphone },
+  { id: 'pink', name: 'Pink (Розовый)', hex: '#e9b3ba', image: PRODUCT_IMAGES.iphone },
+  { id: 'white', name: 'White (Белый)', hex: '#f8f8f8', image: PRODUCT_IMAGES.iphone },
+  { id: 'black', name: 'Black (Чёрный)', hex: '#353839', image: PRODUCT_IMAGES.iphone },
+];
+
+export const IPAD_COLORS: ProductColor[] = [
+  { id: 'space-gray', name: 'Space Gray (Серый космос)', hex: '#6e6f73', image: PRODUCT_IMAGES.ipad },
+  { id: 'blue', name: 'Blue (Синий)', hex: '#899ab0', image: PRODUCT_IMAGES.ipad },
+  { id: 'purple', name: 'Purple (Фиолетовый)', hex: '#b8b1ca', image: PRODUCT_IMAGES.ipad },
+  { id: 'starlight', name: 'Starlight (Сияющая звезда)', hex: '#e5e0d8', image: PRODUCT_IMAGES.ipad },
+];
+
+export const MACBOOK_COLORS: ProductColor[] = [
+  { id: 'midnight', name: 'Midnight (Тёмная ночь)', hex: '#2e3642', image: PRODUCT_IMAGES.macbook },
+  { id: 'starlight', name: 'Starlight (Сияющая звезда)', hex: '#f0e4d3', image: PRODUCT_IMAGES.macbook },
+  { id: 'space-gray', name: 'Space Gray (Серый космос)', hex: '#7d7e80', image: PRODUCT_IMAGES.macbook },
+  { id: 'silver', name: 'Silver (Серебристый)', hex: '#e3e4e6', image: PRODUCT_IMAGES.macbook },
+];
+
+export const WATCH_COLORS: ProductColor[] = [
+  { id: 'jet-black', name: 'Jet Black (Глянцевый чёрный)', hex: '#1a1a1a', image: PRODUCT_IMAGES.watch },
+  { id: 'rose-gold', name: 'Rose Gold (Розовое золото)', hex: '#eecbc4', image: PRODUCT_IMAGES.watch },
+  { id: 'silver', name: 'Silver (Серебристый)', hex: '#e3e4e6', image: PRODUCT_IMAGES.watch },
+];
+
+export const DYSON_COLORS: ProductColor[] = [
+  { id: 'ceramic-pink', name: 'Ceramic Pink (Керамический розовый)', hex: '#dfa8a8', image: PRODUCT_IMAGES.dyson },
+  { id: 'strawberry-bronze', name: 'Strawberry Bronze (Клубничная бронза)', hex: '#c9826f', image: PRODUCT_IMAGES.dyson },
+  { id: 'nickel-copper', name: 'Nickel / Copper (Никель и медь)', hex: '#907f76', image: PRODUCT_IMAGES.dyson },
+  { id: 'prussian-blue', name: 'Prussian Blue (Синий индиго)', hex: '#26384a', image: PRODUCT_IMAGES.dyson },
+];
+
+// МОДЕЛЬ ТОВАРА (ГРУППА С ВЫБОРОМ ПАМЯТИ/SIM/ЦВЕТА)
 export interface ProductModel {
   id: string;
   name: string;
@@ -106,6 +165,7 @@ export interface ProductModel {
   badge?: string; // Никакого "Топ продаж" над телефонами!
   warranty: string;
   image: string;
+  colorOptions?: ProductColor[];
   simOptions?: ('ESIM' | 'SIM')[];
   storageOptions?: string[];
   sizeOptions?: string[];
@@ -123,6 +183,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'iPhone 18',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.iphone,
+    colorOptions: IPHONE_PRO_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ'],
     variants: [
@@ -181,6 +242,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'iPhone 18',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.iphone,
+    colorOptions: IPHONE_PRO_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ', '2 ТБ'],
     variants: [
@@ -253,6 +315,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'iPhone Duo',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.iphone,
+    colorOptions: IPHONE_BASE_COLORS,
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ'],
     variants: [
       {
@@ -286,6 +349,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'iPhone 17',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.iphone,
+    colorOptions: IPHONE_BASE_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ'],
     variants: [
@@ -316,6 +380,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'iPhone 17',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.iphone,
+    colorOptions: IPHONE_PRO_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ'],
     variants: [
@@ -374,6 +439,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'iPhone 17',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.iphone,
+    colorOptions: IPHONE_PRO_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ', '2 ТБ'],
     variants: [
@@ -446,6 +512,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'iPad',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.ipad,
+    colorOptions: IPAD_COLORS,
     storageOptions: ['128 ГБ', '256 ГБ'],
     variants: [
       {
@@ -473,6 +540,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'iPad',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.ipad,
+    colorOptions: IPAD_COLORS,
     storageOptions: ['128 ГБ', '256 ГБ'],
     variants: [
       {
@@ -500,6 +568,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'MacBook',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.macbook,
+    colorOptions: MACBOOK_COLORS,
     storageOptions: ['256 ГБ', '512 ГБ'],
     variants: [
       {
@@ -527,6 +596,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'MacBook',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.macbook,
+    colorOptions: MACBOOK_COLORS,
     storageOptions: ['512 ГБ'],
     variants: [
       {
@@ -624,6 +694,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'Apple Watch',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.watch,
+    colorOptions: WATCH_COLORS,
     sizeOptions: ['42 мм', '46 мм'],
     variants: [
       {
@@ -651,6 +722,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'Apple Watch',
     warranty: '1 год официальной гарантии',
     image: PRODUCT_IMAGES.watch,
+    colorOptions: WATCH_COLORS,
     sizeOptions: ['40 мм', '44 мм'],
     variants: [
       {
@@ -678,6 +750,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'Airstrait',
     warranty: '2 года гарантии',
     image: PRODUCT_IMAGES.dyson,
+    colorOptions: DYSON_COLORS,
     variants: [
       {
         id: 'dyson-airstrait',
@@ -697,6 +770,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'Airwrap HS08',
     warranty: '2 года гарантии',
     image: PRODUCT_IMAGES.dyson,
+    colorOptions: DYSON_COLORS,
     variants: [
       {
         id: 'dyson-hs08',
@@ -716,6 +790,7 @@ export const PRODUCT_MODELS: ProductModel[] = [
     subcategory: 'Airwrap HS09',
     warranty: '2 года гарантии',
     image: PRODUCT_IMAGES.dyson,
+    colorOptions: DYSON_COLORS,
     variants: [
       {
         id: 'dyson-hs09',
