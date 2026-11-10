@@ -1011,7 +1011,7 @@ export default function App() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
               {filteredModels.map((model) => {
                 const activeVariant = getActiveVariant(model);
                 const itemPayment = getCardPaymentMethod(model.id);
@@ -1085,7 +1085,7 @@ export default function App() {
                           </h3>
                         </div>
 
-                        {/* SELECTOR: COLOR SELECTION WITH ENLARGED PICTURE THUMBNAILS */}
+                        {/* SELECTOR: COLOR SELECTION WITH ENLARGED SQUARE PICTURE THUMBNAILS */}
                         {model.colorOptions && model.colorOptions.length > 0 && (
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-xs">
@@ -1096,7 +1096,7 @@ export default function App() {
                                 {activeColor?.name}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
+                            <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1">
                               {model.colorOptions.map((col) => {
                                 const isColSel = activeColor?.id === col.id;
                                 return (
@@ -1105,25 +1105,25 @@ export default function App() {
                                     type="button"
                                     onClick={() => updateCardSelection(model.id, { colorId: col.id })}
                                     title={col.name}
-                                    className={`group/color relative p-1 rounded-2xl border-2 transition-all flex items-center justify-center shrink-0 active:scale-95 cursor-pointer ${
+                                    className={`group/color relative rounded-2xl border-2 transition-all flex items-center justify-center shrink-0 active:scale-95 cursor-pointer overflow-hidden ${
                                       isColSel
-                                        ? 'border-[#7a0f2d] dark:border-[#ffead1] ring-2 ring-[#b4401f]/40 dark:ring-[#ffead1]/30 scale-105 shadow-md bg-[#ffead1]/30 dark:bg-[#7a0f2d]/30'
-                                        : 'border-slate-200 dark:border-white/10 hover:border-[#b4401f]/60 dark:hover:border-white/40 hover:scale-[1.02] bg-white dark:bg-[#121622]'
+                                        ? 'border-[#7a0f2d] dark:border-[#ffead1] ring-2 ring-[#b4401f]/40 dark:ring-[#ffead1]/30 scale-105 shadow-md'
+                                        : 'border-slate-200 dark:border-white/10 hover:border-[#b4401f]/60 dark:hover:border-white/40 hover:scale-[1.02]'
                                     }`}
                                   >
-                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-slate-100 dark:bg-[#0e121c] flex items-center justify-center relative shadow-inner">
+                                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 dark:bg-[#0e121c] flex items-center justify-center relative shadow-inner overflow-hidden">
                                       <img
                                         src={col.image}
                                         alt={col.name}
                                         loading="lazy"
-                                        className="w-full h-full object-contain p-1 transition-transform duration-300 group-hover/color:scale-110"
+                                        className="w-full h-full object-cover transition-transform duration-300 group-hover/color:scale-110"
                                         onError={(e) => {
                                           (e.currentTarget as HTMLElement).style.display = 'none';
                                         }}
                                       />
                                       {col.hex && (
                                         <span
-                                          className="w-4 h-4 rounded-full border-2 border-white dark:border-[#121622] absolute bottom-1 right-1 shadow-sm pointer-events-none"
+                                          className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 border-white dark:border-[#121622] absolute bottom-1 right-1 shadow-sm pointer-events-none"
                                           style={{ backgroundColor: col.hex }}
                                         />
                                       )}
@@ -1225,14 +1225,14 @@ export default function App() {
                     {/* ================================================================ */}
                     {/* AUTHENTIC MULTI-COLOR PRICING TAG (КАК НА ФОТО ПОЛЬЗОВАТЕЛЯ)      */}
                     {/* ================================================================ */}
-                    <div className="p-3 sm:p-4 border-t border-slate-100 dark:border-white/10 space-y-2 bg-slate-50/60 dark:bg-[#0e121c]/90 mt-auto">
+                    <div className="p-2.5 sm:p-3.5 border-t border-slate-100 dark:border-white/10 space-y-1.5 sm:space-y-2 bg-slate-50/60 dark:bg-[#0e121c]/90 mt-auto">
                       
                       {/* 1. Header Box: Model Title + Spec Summary (Wine Crimson #7a0f2d) */}
-                      <div className="rounded-2xl bg-[#7a0f2d] text-white p-3 sm:p-3.5 shadow-xs">
-                        <div className="font-extrabold text-base sm:text-lg leading-tight text-white tracking-tight">
+                      <div className="rounded-2xl bg-[#7a0f2d] text-white p-2.5 sm:p-3 shadow-xs">
+                        <div className="font-extrabold text-sm sm:text-base leading-tight text-white tracking-tight">
                           {model.name}
                         </div>
-                        <div className="text-xs sm:text-sm text-[#ffead1] font-medium leading-tight mt-0.5">
+                        <div className="text-[11px] sm:text-xs text-[#ffead1] font-medium leading-tight mt-0.5 truncate">
                           {specSubtitle}
                         </div>
                       </div>
@@ -1241,37 +1241,37 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => updateCardSelection(model.id, { paymentMethod: 'kaspi' })}
-                        className={`w-full text-left rounded-2xl bg-[#ffead1] hover:bg-[#ffe3c2] text-[#2a1a1f] p-2.5 sm:p-3 transition-all flex items-center justify-between gap-2 shadow-2xs relative cursor-pointer active:scale-[0.99] ${
+                        className={`w-full text-left rounded-2xl bg-[#ffead1] hover:bg-[#ffe3c2] text-[#2a1a1f] p-2 sm:p-2.5 transition-all flex items-center justify-between gap-1.5 sm:gap-2 shadow-2xs relative cursor-pointer active:scale-[0.99] min-w-0 overflow-hidden ${
                           itemPayment === 'kaspi'
                             ? 'ring-2 ring-rose-500 ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
                             : 'opacity-95 hover:opacity-100'
                         }`}
                       >
                         <div className="shrink-0 leading-none">
-                          <span className="font-black text-sm sm:text-base text-[#F14635] block tracking-tight">
+                          <span className="font-black text-xs sm:text-sm text-[#F14635] block tracking-tight">
                             Kaspi
                           </span>
-                          <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium block mt-0.5">
+                          <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium block mt-0.5">
                             рассрочка
                           </span>
                         </div>
 
-                        <div className="text-center sm:text-left flex-1 px-1">
-                          <span className="font-black font-mono text-base sm:text-lg md:text-xl text-[#2a1a1f] whitespace-nowrap">
+                        <div className="text-center sm:text-left flex-1 px-1 min-w-0">
+                          <span className="font-black font-mono text-xs sm:text-sm md:text-base xl:text-lg text-[#2a1a1f] whitespace-nowrap block truncate">
                             {kaspiPrice !== null ? formatPrice(kaspiPrice) : 'По запросу'}
                           </span>
                         </div>
 
                         <div className="shrink-0 text-right leading-tight space-y-0.5">
-                          <div className="flex items-center justify-end gap-1.5 text-right">
-                            <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium">12 мес</span>
-                            <span className="font-black text-xs sm:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1 sm:gap-1.5 text-right">
+                            <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium">12 мес</span>
+                            <span className="font-black text-[11px] sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
                               {kaspi12 !== null ? formatPrice(kaspi12).replace(' ₸', '') : '—'}
                             </span>
                           </div>
-                          <div className="flex items-center justify-end gap-1.5 text-right">
-                            <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium">24 мес</span>
-                            <span className="font-black text-xs sm:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1 sm:gap-1.5 text-right">
+                            <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium">24 мес</span>
+                            <span className="font-black text-[11px] sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
                               {kaspi24 !== null ? formatPrice(kaspi24).replace(' ₸', '') : '—'}
                             </span>
                           </div>
@@ -1282,37 +1282,37 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => updateCardSelection(model.id, { paymentMethod: 'halyk' })}
-                        className={`w-full text-left rounded-2xl bg-[#ffead1] hover:bg-[#ffe3c2] text-[#2a1a1f] p-2.5 sm:p-3 transition-all flex items-center justify-between gap-2 shadow-2xs relative cursor-pointer active:scale-[0.99] ${
+                        className={`w-full text-left rounded-2xl bg-[#ffead1] hover:bg-[#ffe3c2] text-[#2a1a1f] p-2 sm:p-2.5 transition-all flex items-center justify-between gap-1.5 sm:gap-2 shadow-2xs relative cursor-pointer active:scale-[0.99] min-w-0 overflow-hidden ${
                           itemPayment === 'halyk'
                             ? 'ring-2 ring-emerald-600 ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
                             : 'opacity-95 hover:opacity-100'
                         }`}
                       >
                         <div className="shrink-0 leading-none">
-                          <span className="font-black text-sm sm:text-base text-[#007A53] block tracking-tight">
+                          <span className="font-black text-xs sm:text-sm text-[#007A53] block tracking-tight">
                             Halyk
                           </span>
-                          <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium block mt-0.5">
+                          <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium block mt-0.5">
                             рассрочка
                           </span>
                         </div>
 
-                        <div className="text-center sm:text-left flex-1 px-1">
-                          <span className="font-black font-mono text-base sm:text-lg md:text-xl text-[#2a1a1f] whitespace-nowrap">
+                        <div className="text-center sm:text-left flex-1 px-1 min-w-0">
+                          <span className="font-black font-mono text-xs sm:text-sm md:text-base xl:text-lg text-[#2a1a1f] whitespace-nowrap block truncate">
                             {halykPrice !== null ? formatPrice(halykPrice) : 'По запросу'}
                           </span>
                         </div>
 
                         <div className="shrink-0 text-right leading-tight space-y-0.5">
-                          <div className="flex items-center justify-end gap-1.5 text-right">
-                            <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium">12 мес</span>
-                            <span className="font-black text-xs sm:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1 sm:gap-1.5 text-right">
+                            <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium">12 мес</span>
+                            <span className="font-black text-[11px] sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
                               {halyk12 !== null ? formatPrice(halyk12).replace(' ₸', '') : '—'}
                             </span>
                           </div>
-                          <div className="flex items-center justify-end gap-1.5 text-right">
-                            <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium">24 мес</span>
-                            <span className="font-black text-xs sm:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1 sm:gap-1.5 text-right">
+                            <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium">24 мес</span>
+                            <span className="font-black text-[11px] sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
                               {halyk24 !== null ? formatPrice(halyk24).replace(' ₸', '') : '—'}
                             </span>
                           </div>
@@ -1320,27 +1320,27 @@ export default function App() {
                       </button>
 
                       {/* 4. Bottom 2 Blocks (АКЦИЯ & НАЛИЧНЫМИ side-by-side) */}
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                         {/* Left: АКЦИЯ (Wine Crimson #7a0f2d) */}
                         <button
                           type="button"
                           onClick={() => updateCardSelection(model.id, { paymentMethod: 'promo' })}
-                          className={`w-full text-left rounded-2xl bg-[#7a0f2d] hover:bg-[#8e1236] text-white p-2.5 sm:p-3 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] ${
+                          className={`w-full text-left rounded-2xl bg-[#7a0f2d] hover:bg-[#8e1236] text-white p-2 sm:p-2.5 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] min-w-0 overflow-hidden ${
                             itemPayment === 'promo'
                               ? 'ring-2 ring-white ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
                               : 'opacity-95 hover:opacity-100'
                           }`}
                         >
                           <div>
-                            <span className="font-black text-xs sm:text-sm uppercase tracking-wide block leading-none">
+                            <span className="font-black text-[11px] sm:text-xs uppercase tracking-wide block leading-none">
                               АКЦИЯ
                             </span>
-                            <span className="text-[10px] sm:text-[11px] text-[#ffead1]/90 font-medium block mt-1 leading-tight">
+                            <span className="text-[9px] sm:text-[10px] text-[#ffead1]/90 font-medium block mt-1 leading-tight truncate">
                               при онлайн-оплате
                             </span>
                           </div>
-                          <div className="mt-2.5">
-                            <span className="font-black font-mono text-base sm:text-lg md:text-xl text-white block whitespace-nowrap leading-none">
+                          <div className="mt-2">
+                            <span className="font-black font-mono text-xs sm:text-sm md:text-base text-white block whitespace-nowrap leading-none truncate">
                               {promoPrice !== null ? formatPrice(promoPrice) : 'По запросу'}
                             </span>
                           </div>
@@ -1350,22 +1350,22 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => updateCardSelection(model.id, { paymentMethod: 'cash' })}
-                          className={`w-full text-left rounded-2xl bg-[#2a1a1f] hover:bg-[#3d262d] text-white p-2.5 sm:p-3 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] ${
+                          className={`w-full text-left rounded-2xl bg-[#2a1a1f] hover:bg-[#3d262d] text-white p-2 sm:p-2.5 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] min-w-0 overflow-hidden ${
                             itemPayment === 'cash'
                               ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
                               : 'opacity-95 hover:opacity-100'
                           }`}
                         >
                           <div>
-                            <span className="font-black text-xs sm:text-sm uppercase tracking-wide block leading-none">
+                            <span className="font-black text-[11px] sm:text-xs uppercase tracking-wide block leading-none">
                               НАЛИЧНЫМИ
                             </span>
-                            <span className="text-[10px] sm:text-[11px] text-[#ffead1]/80 font-medium block mt-1 leading-tight">
+                            <span className="text-[9px] sm:text-[10px] text-[#ffead1]/80 font-medium block mt-1 leading-tight truncate">
                               бумажные деньги
                             </span>
                           </div>
-                          <div className="mt-2.5">
-                            <span className="font-black font-mono text-base sm:text-lg md:text-xl text-white block whitespace-nowrap leading-none">
+                          <div className="mt-2">
+                            <span className="font-black font-mono text-xs sm:text-sm md:text-base text-white block whitespace-nowrap leading-none truncate">
                               {cashPrice !== null ? formatPrice(cashPrice) : 'По запросу'}
                             </span>
                           </div>
