@@ -81,11 +81,11 @@ const ProductImage: React.FC<ProductImageProps> = ({
     <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${roundedCls} ${containerClassName}`}>
       {/* Loading Skeleton & Spinner Indicator */}
       {!loaded && !hasError && (
-        <div className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200/70 dark:from-[#151926] dark:to-[#1f2638] animate-pulse z-10 transition-opacity duration-300 ${roundedCls}`}>
+        <div className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#ffead1]/25 to-slate-100 dark:from-[#2a1a1f] dark:to-[#1a0f13] animate-pulse z-10 transition-opacity duration-200 ${roundedCls}`}>
           <div className="flex flex-col items-center justify-center gap-1.5">
-            <Loader2 className={`${size === 'thumb' ? 'w-4 h-4 text-[#5B0601] dark:text-rose-400' : 'w-7 h-7 text-[#5B0601] dark:text-rose-400'} animate-spin`} />
+            <Loader2 className={`${size === 'thumb' ? 'w-4 h-4 text-[#7a0f2d] dark:text-[#ffead1]' : 'w-7 h-7 text-[#7a0f2d] dark:text-[#ffead1]'} animate-spin`} />
             {size !== 'thumb' && (
-              <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 tracking-wide">
+              <span className="text-[10px] font-medium text-slate-400 dark:text-[#ffead1]/60 tracking-wide">
                 Загрузка фото...
               </span>
             )}
@@ -95,19 +95,20 @@ const ProductImage: React.FC<ProductImageProps> = ({
 
       {/* Fallback in case of broken link */}
       {hasError ? (
-        <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 p-2 text-center">
+        <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-2 text-center">
           <span className="text-xl">📱</span>
           <span className="text-[10px] mt-1 line-clamp-1">{alt}</span>
         </div>
       ) : (
         <img
+          key={src}
           src={src}
           alt={alt}
-          loading="lazy"
+          loading="eager"
           decoding="async"
           onLoad={() => setLoaded(true)}
           onError={() => setHasError(true)}
-          className={`${className} ${roundedCls} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`${className} ${roundedCls} transition-all duration-300 ${loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
         />
       )}
     </div>
@@ -570,10 +571,10 @@ export default function App() {
                 onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
               />
               <div className="hidden sm:flex flex-col">
-                <span className="text-xl font-black tracking-tight text-[#5B0601] dark:text-white transition-colors">
+                <span className="text-xl font-black tracking-tight text-[#7a0f2d] dark:text-[#ffead1] transition-colors">
                   {SITE_INFO.shopName}
                 </span>
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-[#ffead1]/70">
                   Электроника в Алматы
                 </span>
               </div>
@@ -581,24 +582,24 @@ export default function App() {
           </div>
 
           {/* Top Header Navigation */}
-          <nav className="flex items-center gap-1.5 sm:gap-3 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+          <nav className="flex items-center gap-1.5 sm:gap-3 text-xs sm:text-sm font-bold text-slate-700 dark:text-[#ffead1]/90">
             <a
               href="#catalog"
-              className="py-1 px-2 rounded-lg hover:text-[#5B0601] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+              className="py-1 px-2 rounded-lg hover:text-[#7a0f2d] dark:hover:text-[#ffead1] hover:bg-[#ffead1]/30 dark:hover:bg-white/5 transition-colors"
             >
               Каталог
             </a>
             <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
             <a
               href="#faq"
-              className="py-1 px-2 rounded-lg hover:text-[#5B0601] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+              className="py-1 px-2 rounded-lg hover:text-[#7a0f2d] dark:hover:text-[#ffead1] hover:bg-[#ffead1]/30 dark:hover:bg-white/5 transition-colors"
             >
               FAQ
             </a>
             <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
             <a
               href="#contacts"
-              className="py-1 px-2 rounded-lg hover:text-[#5B0601] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+              className="py-1 px-2 rounded-lg hover:text-[#7a0f2d] dark:hover:text-[#ffead1] hover:bg-[#ffead1]/30 dark:hover:bg-white/5 transition-colors"
             >
               О нас
             </a>
@@ -614,19 +615,19 @@ export default function App() {
               title={isDark ? "Переключить на светлую тему" : "Переключить на тёмную тему"}
               className="p-2 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             >
-              {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-[#5B0601]" />}
+              {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-[#7a0f2d]" />}
             </button>
 
             {/* Cart Button with Count Badge */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white transition-all flex items-center gap-2 font-semibold text-xs sm:text-sm"
+              className="relative p-2 sm:px-3 sm:py-1.5 rounded-xl bg-[#ffead1]/40 hover:bg-[#ffead1]/70 dark:bg-white/10 dark:hover:bg-white/15 text-[#2a1a1f] dark:text-[#ffead1] transition-all flex items-center gap-2 font-semibold text-xs sm:text-sm border border-[#7a0f2d]/15 dark:border-white/10"
               aria-label="Открыть корзину"
             >
-              <ShoppingCart className="w-4 h-4 text-[#5B0601] dark:text-white" />
+              <ShoppingCart className="w-4 h-4 text-[#7a0f2d] dark:text-[#ffead1]" />
               <span className="hidden sm:inline">Корзина</span>
               {cartTotals.totalCount > 0 && (
-                <span className="px-1.5 py-0.5 text-[11px] font-black rounded-full bg-[#5B0601] text-white">
+                <span className="px-1.5 py-0.5 text-[11px] font-black rounded-full bg-[#7a0f2d] text-[#ffead1]">
                   {cartTotals.totalCount}
                 </span>
               )}
@@ -648,7 +649,7 @@ export default function App() {
           <div className="relative w-4/5 max-w-xs bg-white dark:bg-[#121622] text-slate-900 dark:text-white h-full shadow-2xl flex flex-col z-10 p-5 space-y-5 overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
-              <span className="font-black text-xl text-[#5B0601] dark:text-white">
+              <span className="font-black text-xl text-[#7a0f2d] dark:text-[#ffead1]">
                 {SITE_INFO.shopName}
               </span>
               <button
@@ -675,7 +676,7 @@ export default function App() {
                 }}
                 className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between ${
                   selectedCategory === 'all'
-                    ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
+                    ? 'bg-[#7a0f2d] text-[#ffead1] dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border dark:border-[#b4401f]'
                     : 'hover:bg-slate-100 dark:hover:bg-white/5'
                 }`}
               >
@@ -694,7 +695,7 @@ export default function App() {
                 }}
                 className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between ${
                   selectedCategory === 'apple'
-                    ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
+                    ? 'bg-[#7a0f2d] text-[#ffead1] dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border dark:border-[#b4401f]'
                     : 'hover:bg-slate-100 dark:hover:bg-white/5'
                 }`}
               >
@@ -715,7 +716,7 @@ export default function App() {
                 }}
                 className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between ${
                   selectedCategory === 'dyson'
-                    ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
+                    ? 'bg-[#7a0f2d] text-[#ffead1] dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border dark:border-[#b4401f]'
                     : 'hover:bg-slate-100 dark:hover:bg-white/5'
                 }`}
               >
@@ -736,7 +737,7 @@ export default function App() {
                 }}
                 className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between ${
                   selectedCategory === 'other'
-                    ? 'bg-[#5B0601] text-white dark:bg-white dark:text-slate-900'
+                    ? 'bg-[#7a0f2d] text-[#ffead1] dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border dark:border-[#b4401f]'
                     : 'hover:bg-slate-100 dark:hover:bg-white/5'
                 }`}
               >
@@ -855,7 +856,7 @@ export default function App() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Поиск по названию модели..."
-                className="w-full pl-9 pr-8 py-2.5 rounded-xl text-xs sm:text-sm bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5B0601]/20 dark:focus:ring-white/20 shadow-xs"
+                className="w-full pl-9 pr-8 py-2.5 rounded-xl text-xs sm:text-sm bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7a0f2d]/30 dark:focus:ring-white/20 shadow-xs"
               />
               {searchQuery && (
                 <button
@@ -869,17 +870,17 @@ export default function App() {
             </div>
           </div>
 
-          {/* TRADE-IN BANNER & HIGHLIGHT (UP AT TOP) */}
-          <div id="trade-in" className="scroll-mt-20 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 dark:from-amber-950/30 dark:via-rose-950/30 dark:to-amber-950/30 border border-amber-300/60 dark:border-amber-700/40 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+          {/* TRADE-IN BANNER & HIGHLIGHT (YELLOW / AMBER IN DARK MODE AS REQUESTED) */}
+          <div id="trade-in" className="scroll-mt-20 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-yellow-500/10 dark:from-amber-950/60 dark:via-yellow-950/40 dark:to-amber-900/40 border border-amber-300 dark:border-amber-500/40 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3 text-center sm:text-left min-w-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/15 dark:bg-amber-500/25 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
                 <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-xs sm:text-sm md:text-base font-black text-slate-900 dark:text-white leading-snug">
+                <h2 className="text-xs sm:text-sm md:text-base font-black text-slate-900 dark:text-amber-300 leading-snug">
                   Обменяйте старый iPhone на любую новую технику с доплатой
                 </h2>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                <p className="text-[11px] text-slate-600 dark:text-amber-200/80">
                   Принимаются только Apple iPhone · Онлайн-оценка за 5 минут у сотрудника
                 </p>
               </div>
@@ -889,7 +890,7 @@ export default function App() {
               href="https://bylance.kz/trade-in"
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-all active:scale-95 whitespace-nowrap"
+              className="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 dark:bg-amber-400 dark:hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer"
             >
               <ExternalLink className="w-3.5 h-3.5 shrink-0" />
               <span>Онлайн-оценка на сайте ↗</span>
@@ -908,11 +909,11 @@ export default function App() {
                   key={m.id}
                   type="button"
                   onClick={() => handleSelectGlobalPayment(m.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 active:scale-95 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 active:scale-95 cursor-pointer ${
                     isSelected
                       ? m.id === 'cash'
                         ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                        : 'bg-[#5B0601] text-white border-[#5B0601] dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
+                        : 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f] shadow-xs'
                       : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                   }`}
                 >
@@ -932,9 +933,9 @@ export default function App() {
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-3 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all border shrink-0 min-h-[40px] flex items-center justify-center active:scale-95 ${
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all border shrink-0 min-h-[40px] flex items-center justify-center active:scale-95 cursor-pointer ${
                 selectedCategory === 'all'
-                  ? 'bg-[#5B0601] text-white border-[#5B0601] shadow-sm dark:bg-white dark:text-slate-900 dark:border-white'
+                  ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] shadow-sm dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]'
                   : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
               }`}
             >
@@ -948,9 +949,9 @@ export default function App() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all border shrink-0 min-h-[40px] flex items-center justify-center active:scale-95 ${
+                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all border shrink-0 min-h-[40px] flex items-center justify-center active:scale-95 cursor-pointer ${
                     isSelected
-                      ? 'bg-[#5B0601] text-white border-[#5B0601] shadow-sm dark:bg-white dark:text-slate-900 dark:border-white'
+                      ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] shadow-sm dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]'
                       : 'bg-white dark:bg-[#121622] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                   }`}
                 >
@@ -964,7 +965,7 @@ export default function App() {
           {availableSubcategories.length > 1 && (
             <div className="flex items-center gap-2 pt-1 overflow-x-auto no-scrollbar pb-1">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0 flex items-center gap-1.5 mr-0.5">
-                <Filter className="w-3.5 h-3.5 text-[#5B0601] dark:text-rose-400" />
+                <Filter className="w-3.5 h-3.5 text-[#7a0f2d] dark:text-[#ffead1]" />
                 <span>Подкатегория:</span>
               </span>
               <button
@@ -1004,7 +1005,7 @@ export default function App() {
               </p>
               <button
                 onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedSubcategory('all'); }}
-                className="text-xs font-bold text-[#5B0601] dark:text-rose-400 hover:underline"
+                className="text-xs font-bold text-[#7a0f2d] dark:text-[#ffead1] hover:underline"
               >
                 Сбросить фильтры
               </button>
@@ -1029,6 +1030,23 @@ export default function App() {
                 const activeColor = model.colorOptions?.find((c) => c.id === sel.colorId) || model.colorOptions?.[0];
                 const displayImage = activeColor?.image || model.image;
 
+                const kaspiPrice = activeVariant.prices.kaspi;
+                const halykPrice = activeVariant.prices.halyk;
+                const promoPrice = activeVariant.prices.promo;
+                const cashPrice = activeVariant.prices.cash;
+
+                const kaspi12 = kaspiPrice ? Math.round(kaspiPrice / 12) : null;
+                const kaspi24 = kaspiPrice ? Math.round(kaspiPrice / 24) : null;
+                const halyk12 = halykPrice ? Math.round(halykPrice / 12) : null;
+                const halyk24 = halykPrice ? Math.round(halykPrice / 24) : null;
+
+                const specParts: string[] = [];
+                if (activeStorage) specParts.push(activeStorage);
+                if (activeSim) specParts.push(activeSim === 'ESIM' ? 'eSIM' : 'SIM');
+                if (activeSize) specParts.push(activeSize);
+                if (activeColor) specParts.push(activeColor.name.split(' (')[0]);
+                const specSubtitle = specParts.length > 0 ? specParts.join(' · ') : model.subcategory;
+
                 return (
                   <div
                     key={model.id}
@@ -1036,12 +1054,17 @@ export default function App() {
                   >
                     <div>
                       {/* Product Studio Photo Container */}
-                      <div className="w-full aspect-square bg-[#f5f6f8] dark:bg-[#181d2a] p-4 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-white/5">
+                      <div className="w-full aspect-square bg-slate-50 dark:bg-[#0e121c] p-4 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-white/5 relative">
                         <ProductImage
                           src={displayImage}
                           alt={model.name}
-                          className="w-full h-full object-contain rounded-2xl mix-blend-multiply dark:mix-blend-normal group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-contain rounded-2xl group-hover:scale-105 transition-transform duration-300"
                         />
+                        {activeColor && (
+                          <span className="absolute bottom-3 right-3 text-[10px] font-bold tracking-wide px-2.5 py-0.5 rounded-full bg-white/90 dark:bg-[#181d2a]/90 backdrop-blur-xs text-slate-800 dark:text-slate-200 border border-black/5 dark:border-white/10 shadow-2xs pointer-events-none">
+                            {activeColor.name}
+                          </span>
+                        )}
                       </div>
 
                       {/* Card Content */}
@@ -1062,18 +1085,18 @@ export default function App() {
                           </h3>
                         </div>
 
-                        {/* SELECTOR: COLOR SELECTION WITH MINI PICTURE THUMBNAILS */}
+                        {/* SELECTOR: COLOR SELECTION WITH ENLARGED PICTURE THUMBNAILS */}
                         {model.colorOptions && model.colorOptions.length > 0 && (
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between text-[11px]">
-                              <span className="font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-extrabold uppercase tracking-wider text-[#7a0f2d] dark:text-[#ffead1]">
                                 Цвет:
                               </span>
-                              <span className="font-bold text-slate-900 dark:text-white truncate ml-2">
+                              <span className="font-bold text-[#2a1a1f] dark:text-[#ffead1] bg-[#ffead1]/60 dark:bg-[#7a0f2d]/40 px-2.5 py-0.5 rounded-lg text-xs truncate ml-2 border border-[#7a0f2d]/20 dark:border-white/10 shadow-2xs">
                                 {activeColor?.name}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                            <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
                               {model.colorOptions.map((col) => {
                                 const isColSel = activeColor?.id === col.id;
                                 return (
@@ -1082,25 +1105,25 @@ export default function App() {
                                     type="button"
                                     onClick={() => updateCardSelection(model.id, { colorId: col.id })}
                                     title={col.name}
-                                    className={`group/color relative p-0.5 rounded-xl border-2 transition-all flex items-center justify-center shrink-0 active:scale-95 ${
+                                    className={`group/color relative p-1 rounded-2xl border-2 transition-all flex items-center justify-center shrink-0 active:scale-95 cursor-pointer ${
                                       isColSel
-                                        ? 'border-[#5B0601] dark:border-rose-400 ring-2 ring-[#5B0601]/25 dark:ring-rose-400/30 scale-105 shadow-xs'
-                                        : 'border-slate-200/90 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/30'
+                                        ? 'border-[#7a0f2d] dark:border-[#ffead1] ring-2 ring-[#b4401f]/40 dark:ring-[#ffead1]/30 scale-105 shadow-md bg-[#ffead1]/30 dark:bg-[#7a0f2d]/30'
+                                        : 'border-slate-200 dark:border-white/10 hover:border-[#b4401f]/60 dark:hover:border-white/40 hover:scale-[1.02] bg-white dark:bg-[#121622]'
                                     }`}
                                   >
-                                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-[#1a2030] flex items-center justify-center relative">
+                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-slate-100 dark:bg-[#0e121c] flex items-center justify-center relative shadow-inner">
                                       <img
                                         src={col.image}
                                         alt={col.name}
                                         loading="lazy"
-                                        className="w-full h-full object-cover transition-transform group-hover/color:scale-110"
+                                        className="w-full h-full object-contain p-1 transition-transform duration-300 group-hover/color:scale-110"
                                         onError={(e) => {
                                           (e.currentTarget as HTMLElement).style.display = 'none';
                                         }}
                                       />
                                       {col.hex && (
                                         <span
-                                          className="w-3 h-3 rounded-full border border-black/15 dark:border-white/20 absolute bottom-0.5 right-0.5 shadow-xs pointer-events-none"
+                                          className="w-4 h-4 rounded-full border-2 border-white dark:border-[#121622] absolute bottom-1 right-1 shadow-sm pointer-events-none"
                                           style={{ backgroundColor: col.hex }}
                                         />
                                       )}
@@ -1126,9 +1149,9 @@ export default function App() {
                                     key={sim}
                                     type="button"
                                     onClick={() => updateCardSelection(model.id, { simType: sim })}
-                                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border text-center ${
+                                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
                                       isSel
-                                        ? 'bg-[#5B0601] text-white border-[#5B0601] dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
+                                        ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]/60 shadow-xs'
                                         : 'bg-slate-50 dark:bg-[#181d2a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                                     }`}
                                   >
@@ -1154,9 +1177,9 @@ export default function App() {
                                     key={storage}
                                     type="button"
                                     onClick={() => updateCardSelection(model.id, { storage })}
-                                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border text-center ${
+                                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
                                       isSel
-                                        ? 'bg-[#5B0601] text-white border-[#5B0601] dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
+                                        ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]/60 shadow-xs'
                                         : 'bg-slate-50 dark:bg-[#181d2a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                                     }`}
                                   >
@@ -1182,9 +1205,9 @@ export default function App() {
                                     key={sz}
                                     type="button"
                                     onClick={() => updateCardSelection(model.id, { size: sz })}
-                                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border text-center ${
+                                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
                                       isSel
-                                        ? 'bg-[#5B0601] text-white border-[#5B0601] dark:bg-white dark:text-slate-900 dark:border-white shadow-xs'
+                                        ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]/60 shadow-xs'
                                         : 'bg-slate-50 dark:bg-[#181d2a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                                     }`}
                                   >
@@ -1199,78 +1222,163 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Bottom: Payment Selector + Active Variant Price + 2 ACTION BUTTONS (Pinned at same height on every card) */}
-                    <div className="p-4 sm:p-5 pt-3.5 border-t border-slate-100 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-[#141926]/50 mt-auto">
+                    {/* ================================================================ */}
+                    {/* AUTHENTIC MULTI-COLOR PRICING TAG (КАК НА ФОТО ПОЛЬЗОВАТЕЛЯ)      */}
+                    {/* ================================================================ */}
+                    <div className="p-3 sm:p-4 border-t border-slate-100 dark:border-white/10 space-y-2 bg-slate-50/60 dark:bg-[#0e121c]/90 mt-auto">
                       
-                      {/* SELECTOR 4: INDIVIDUAL PAYMENT METHOD (ALWAYS PINNED TO BOTTOM ROW) */}
-                      <div className="space-y-1.5">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
-                          Оплата для этого товара:
-                        </span>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {PAYMENT_METHODS.map((pm) => {
-                            const isSel = itemPayment === pm.id;
-                            return (
-                              <button
-                                key={pm.id}
-                                type="button"
-                                onClick={() => updateCardSelection(model.id, { paymentMethod: pm.id })}
-                                className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 truncate ${
-                                  isSel
-                                    ? pm.id === 'cash'
-                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-500 shadow-xs'
-                                      : 'bg-rose-50 text-[#5B0601] border-[#5B0601] dark:bg-rose-950/60 dark:text-rose-200 dark:border-rose-700'
-                                    : 'bg-white dark:bg-[#181d2a] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300'
-                                }`}
-                              >
-                                <PaymentMethodIcon method={pm.id} className="w-3.5 h-3.5 shrink-0" />
-                                <span className="truncate">{pm.shortLabel}</span>
-                              </button>
-                            );
-                          })}
+                      {/* 1. Header Box: Model Title + Spec Summary (Wine Crimson #7a0f2d) */}
+                      <div className="rounded-2xl bg-[#7a0f2d] text-white p-3 sm:p-3.5 shadow-xs">
+                        <div className="font-extrabold text-base sm:text-lg leading-tight text-white tracking-tight">
+                          {model.name}
+                        </div>
+                        <div className="text-xs sm:text-sm text-[#ffead1] font-medium leading-tight mt-0.5">
+                          {specSubtitle}
                         </div>
                       </div>
-                      <div>
-                        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                          <span className="font-medium truncate">{activeVariant.fullName}</span>
-                          <span className={`font-bold shrink-0 flex items-center gap-1 ${
-                            itemPayment === 'cash' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#5B0601] dark:text-rose-300'
-                          }`}>
-                            <PaymentMethodIcon method={itemPayment} className="w-3.5 h-3.5 shrink-0" />
-                            <span>{activeMethodObj.name}</span>
+
+                      {/* 2. Kaspi Row (Warm Cream #ffead1 / #fff4e5) */}
+                      <button
+                        type="button"
+                        onClick={() => updateCardSelection(model.id, { paymentMethod: 'kaspi' })}
+                        className={`w-full text-left rounded-2xl bg-[#ffead1] hover:bg-[#ffe3c2] text-[#2a1a1f] p-2.5 sm:p-3 transition-all flex items-center justify-between gap-2 shadow-2xs relative cursor-pointer active:scale-[0.99] ${
+                          itemPayment === 'kaspi'
+                            ? 'ring-2 ring-rose-500 ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
+                            : 'opacity-95 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="shrink-0 leading-none">
+                          <span className="font-black text-sm sm:text-base text-[#F14635] block tracking-tight">
+                            Kaspi
+                          </span>
+                          <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium block mt-0.5">
+                            рассрочка
                           </span>
                         </div>
 
-                        {currentPrice !== null && currentPrice !== undefined ? (
-                          <div className="flex items-baseline gap-2 mt-0.5">
-                            <span className="text-2xl font-black text-[#5B0601] dark:text-white font-mono whitespace-nowrap shrink-0">
-                              {formatPrice(currentPrice)}
-                            </span>
-                            {itemPayment === 'cash' && activeVariant.prices.kaspi && (
-                              <span className="text-xs font-bold text-rose-500 dark:text-rose-400 line-through whitespace-nowrap decoration-rose-500">
-                                {formatPrice(activeVariant.prices.kaspi)}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
-                              Цена по запросу
-                            </span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300">
-                              Уточняйте в WhatsApp
+                        <div className="text-center sm:text-left flex-1 px-1">
+                          <span className="font-black font-mono text-base sm:text-lg md:text-xl text-[#2a1a1f] whitespace-nowrap">
+                            {kaspiPrice !== null ? formatPrice(kaspiPrice) : 'По запросу'}
+                          </span>
+                        </div>
+
+                        <div className="shrink-0 text-right leading-tight space-y-0.5">
+                          <div className="flex items-center justify-end gap-1.5 text-right">
+                            <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium">12 мес</span>
+                            <span className="font-black text-xs sm:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                              {kaspi12 !== null ? formatPrice(kaspi12).replace(' ₸', '') : '—'}
                             </span>
                           </div>
-                        )}
+                          <div className="flex items-center justify-end gap-1.5 text-right">
+                            <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium">24 мес</span>
+                            <span className="font-black text-xs sm:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                              {kaspi24 !== null ? formatPrice(kaspi24).replace(' ₸', '') : '—'}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* 3. Halyk Row (Warm Cream #ffead1 / #fff4e5) */}
+                      <button
+                        type="button"
+                        onClick={() => updateCardSelection(model.id, { paymentMethod: 'halyk' })}
+                        className={`w-full text-left rounded-2xl bg-[#ffead1] hover:bg-[#ffe3c2] text-[#2a1a1f] p-2.5 sm:p-3 transition-all flex items-center justify-between gap-2 shadow-2xs relative cursor-pointer active:scale-[0.99] ${
+                          itemPayment === 'halyk'
+                            ? 'ring-2 ring-emerald-600 ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
+                            : 'opacity-95 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="shrink-0 leading-none">
+                          <span className="font-black text-sm sm:text-base text-[#007A53] block tracking-tight">
+                            Halyk
+                          </span>
+                          <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium block mt-0.5">
+                            рассрочка
+                          </span>
+                        </div>
+
+                        <div className="text-center sm:text-left flex-1 px-1">
+                          <span className="font-black font-mono text-base sm:text-lg md:text-xl text-[#2a1a1f] whitespace-nowrap">
+                            {halykPrice !== null ? formatPrice(halykPrice) : 'По запросу'}
+                          </span>
+                        </div>
+
+                        <div className="shrink-0 text-right leading-tight space-y-0.5">
+                          <div className="flex items-center justify-end gap-1.5 text-right">
+                            <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium">12 мес</span>
+                            <span className="font-black text-xs sm:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                              {halyk12 !== null ? formatPrice(halyk12).replace(' ₸', '') : '—'}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-end gap-1.5 text-right">
+                            <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-medium">24 мес</span>
+                            <span className="font-black text-xs sm:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                              {halyk24 !== null ? formatPrice(halyk24).replace(' ₸', '') : '—'}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* 4. Bottom 2 Blocks (АКЦИЯ & НАЛИЧНЫМИ side-by-side) */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* Left: АКЦИЯ (Wine Crimson #7a0f2d) */}
+                        <button
+                          type="button"
+                          onClick={() => updateCardSelection(model.id, { paymentMethod: 'promo' })}
+                          className={`w-full text-left rounded-2xl bg-[#7a0f2d] hover:bg-[#8e1236] text-white p-2.5 sm:p-3 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] ${
+                            itemPayment === 'promo'
+                              ? 'ring-2 ring-white ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
+                              : 'opacity-95 hover:opacity-100'
+                          }`}
+                        >
+                          <div>
+                            <span className="font-black text-xs sm:text-sm uppercase tracking-wide block leading-none">
+                              АКЦИЯ
+                            </span>
+                            <span className="text-[10px] sm:text-[11px] text-[#ffead1]/90 font-medium block mt-1 leading-tight">
+                              при онлайн-оплате
+                            </span>
+                          </div>
+                          <div className="mt-2.5">
+                            <span className="font-black font-mono text-base sm:text-lg md:text-xl text-white block whitespace-nowrap leading-none">
+                              {promoPrice !== null ? formatPrice(promoPrice) : 'По запросу'}
+                            </span>
+                          </div>
+                        </button>
+
+                        {/* Right: НАЛИЧНЫМИ (Obsidian #2a1a1f) */}
+                        <button
+                          type="button"
+                          onClick={() => updateCardSelection(model.id, { paymentMethod: 'cash' })}
+                          className={`w-full text-left rounded-2xl bg-[#2a1a1f] hover:bg-[#3d262d] text-white p-2.5 sm:p-3 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] ${
+                            itemPayment === 'cash'
+                              ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
+                              : 'opacity-95 hover:opacity-100'
+                          }`}
+                        >
+                          <div>
+                            <span className="font-black text-xs sm:text-sm uppercase tracking-wide block leading-none">
+                              НАЛИЧНЫМИ
+                            </span>
+                            <span className="text-[10px] sm:text-[11px] text-[#ffead1]/80 font-medium block mt-1 leading-tight">
+                              бумажные деньги
+                            </span>
+                          </div>
+                          <div className="mt-2.5">
+                            <span className="font-black font-mono text-base sm:text-lg md:text-xl text-white block whitespace-nowrap leading-none">
+                              {cashPrice !== null ? formatPrice(cashPrice) : 'По запросу'}
+                            </span>
+                          </div>
+                        </button>
                       </div>
 
-                      {/* 2 Buttons: Direct 1-Click WhatsApp Order + Add to Cart */}
-                      <div className="space-y-2">
+                      {/* 5. Two Action Buttons: Direct 1-Click WhatsApp Order + Add to Cart */}
+                      <div className="space-y-2 pt-2">
                         {/* Button 1: Order Now Directly via WhatsApp */}
                         <button
                           type="button"
                           onClick={() => handleOrderNowWhatsApp(model, activeVariant, itemPayment, activeColor)}
-                          className="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#25D366] hover:bg-[#20ba59] transition-all shadow-sm flex items-center justify-center gap-2 active:scale-[0.99]"
+                          className="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#25D366] hover:bg-[#20ba59] transition-all shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer"
                         >
                           <Zap className="w-4 h-4 fill-current" />
                           <span>Заказать сразу в WhatsApp</span>
@@ -1280,9 +1388,9 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => addToCart(model, activeVariant, itemPayment, activeColor)}
-                          className="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-slate-800 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-[#1e2436] dark:hover:bg-[#283149] transition-all border border-slate-200 dark:border-white/10 flex items-center justify-center gap-2 active:scale-[0.99]"
+                          className="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-slate-800 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 transition-all border border-slate-200 dark:border-white/10 flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer"
                         >
-                          <ShoppingCart className="w-4 h-4 text-[#5B0601] dark:text-white" />
+                          <ShoppingCart className="w-4 h-4 text-[#7a0f2d] dark:text-[#ffead1]" />
                           <span>
                             {cartQty > 0
                               ? `В корзине (${cartQty} шт.) +`
@@ -1311,12 +1419,12 @@ export default function App() {
             {/* PHOTO FIELD WITH LUXURY GRADIENT EFFECT */}
             <div className="relative group shrink-0 self-center lg:self-start">
               {/* Outer Radiant Ambient Gradient Glow */}
-              <div className="absolute -inset-2 bg-gradient-to-tr from-[#5B0601]/40 via-rose-500/35 via-amber-400/30 to-[#229ED9]/35 rounded-[32px] blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+              <div className="absolute -inset-2 bg-gradient-to-tr from-[#7a0f2d]/40 via-[#b4401f]/35 via-[#ffead1]/30 to-[#7a0f2d]/30 rounded-[32px] blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
               {/* Iridescent Gradient Border Ring */}
-              <div className="p-1 rounded-[28px] bg-gradient-to-tr from-[#5B0601] via-rose-500 via-amber-400 to-[#229ED9] shadow-xl">
+              <div className="p-1 rounded-[28px] bg-gradient-to-tr from-[#7a0f2d] via-[#b4401f] via-[#ffead1] to-[#7a0f2d] shadow-xl">
                 {/* Photo Container Frame */}
-                <div className="relative w-40 h-52 sm:w-48 sm:h-60 md:w-52 md:h-64 rounded-[24px] overflow-hidden bg-gradient-to-b from-slate-900 to-black flex items-center justify-center">
+                <div className="relative w-40 h-52 sm:w-48 sm:h-60 md:w-52 md:h-64 rounded-[24px] overflow-hidden bg-gradient-to-b from-[#2a1a1f] to-black flex items-center justify-center">
                   
                   {/* Founder Photo Image with Graceful Stylized Fallback */}
                   <img
@@ -1333,13 +1441,13 @@ export default function App() {
                   {/* Stylized Gradient Avatar Fallback (when local photo file is not yet placed) */}
                   <div
                     id="founder-gradient-avatar"
-                    className="absolute inset-0 hidden flex-col items-center justify-center p-4 text-center bg-gradient-to-tr from-[#5B0601] via-rose-950 to-slate-900 text-white"
+                    className="absolute inset-0 hidden flex-col items-center justify-center p-4 text-center bg-gradient-to-tr from-[#2a1a1f] via-[#7a0f2d] to-[#1a0f13] text-white"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-400 via-rose-500 to-[#5B0601] flex items-center justify-center text-white font-black text-2xl shadow-lg ring-2 ring-white/20 mb-2">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#b4401f] via-[#7a0f2d] to-[#2a1a1f] flex items-center justify-center text-[#ffead1] font-black text-2xl shadow-lg ring-2 ring-white/20 mb-2">
                       АЖ
                     </div>
-                    <span className="text-xs font-black tracking-tight">Аружан Жеткерген</span>
-                    <span className="text-[10px] text-amber-300 font-bold mt-0.5">@zaagaru</span>
+                    <span className="text-xs font-black tracking-tight text-[#ffead1]">Аружан Жеткерген</span>
+                    <span className="text-[10px] text-[#ffead1]/80 font-bold mt-0.5">@zaagaru</span>
                   </div>
 
                   {/* Aesthetic Bottom Gradient Fade */}
@@ -1351,7 +1459,7 @@ export default function App() {
                       <span className="text-[11px] font-black text-white block leading-tight truncate">
                         {SITE_INFO.founder?.name || 'Аружан Жеткерген'}
                       </span>
-                      <span className="text-[9px] text-amber-300 font-extrabold uppercase tracking-wider block mt-0.5">
+                      <span className="text-[9px] text-[#ffead1] font-extrabold uppercase tracking-wider block mt-0.5">
                         Основательница Bylance
                       </span>
                     </div>
@@ -1363,7 +1471,7 @@ export default function App() {
 
             {/* BIO & TEXT INFO */}
             <div className="space-y-3.5 flex-1 min-w-0 text-center sm:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-[#5B0601] dark:text-rose-300 text-xs font-bold border border-rose-200 dark:border-rose-900/50">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ffead1] dark:bg-[#7a0f2d]/40 text-[#7a0f2d] dark:text-[#ffead1] text-xs font-bold border border-[#7a0f2d]/20 dark:border-[#ffead1]/20">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Основательница магазина Bylance</span>
               </div>
@@ -1446,11 +1554,11 @@ export default function App() {
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-[#181d2a] hover:bg-slate-100 dark:hover:bg-[#1e2536] border border-slate-200 dark:border-white/10 transition-all group"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#5B0601] text-white flex items-center justify-center font-black text-xs">
+                  <div className="w-8 h-8 rounded-lg bg-[#7a0f2d] text-[#ffead1] flex items-center justify-center font-black text-xs">
                     BY
                   </div>
                   <div className="text-left">
-                    <span className="text-xs font-bold text-slate-900 dark:text-white block group-hover:text-[#5B0601] transition-colors">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block group-hover:text-[#b4401f] transition-colors">
                       Магазин @bylance_kz ↗
                     </span>
                     <span className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -1521,13 +1629,13 @@ export default function App() {
         {/* ====================================================================== */}
         <section id="faq" className="space-y-4 scroll-mt-20">
           <div className="text-center max-w-xl mx-auto">
-            <span className="text-xs font-bold text-[#5B0601] dark:text-rose-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#7a0f2d] dark:text-[#ffead1] uppercase tracking-wider">
               Помощь покупателю
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2a1a1f] dark:text-[#ffead1] mt-1">
               Часто задаваемые вопросы (FAQ)
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-[#ffead1]/70 mt-1">
               Ответы на популярные вопросы о рассрочке, гарантии, способах оплаты и получении заказов
             </p>
           </div>
@@ -1543,12 +1651,12 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
-                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 font-extrabold text-sm sm:text-base text-slate-900 dark:text-white hover:text-[#5B0601] dark:hover:text-rose-300 transition-colors"
+                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 font-extrabold text-sm sm:text-base text-[#2a1a1f] dark:text-white hover:text-[#7a0f2d] dark:hover:text-[#ffead1] transition-colors"
                   >
                     <span>{faq.question}</span>
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform ${
-                        isOpen ? 'rotate-180 text-[#5B0601] dark:text-white' : 'text-slate-400'
+                        isOpen ? 'rotate-180 text-[#7a0f2d] dark:text-[#ffead1]' : 'text-slate-400'
                       }`}
                     >
                       <ChevronDown className="w-5 h-5" />
@@ -1717,7 +1825,7 @@ export default function App() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#181d2a] border border-slate-100 dark:border-white/5 space-y-2">
-              <ShieldCheck className="w-6 h-6 text-[#5B0601] dark:text-rose-400" />
+              <ShieldCheck className="w-6 h-6 text-[#7a0f2d] dark:text-[#ffead1]" />
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">100% Оригинал</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Все устройства новые, запечатанные, в оригинальной заводской упаковке с официальной гарантией.
@@ -1759,7 +1867,7 @@ export default function App() {
         <section id="contacts" className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="text-xs font-bold text-[#5B0601] dark:text-rose-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-[#7a0f2d] dark:text-[#ffead1] uppercase tracking-wider">
                 Контакты
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
@@ -1821,7 +1929,7 @@ export default function App() {
       <footer className="mt-12 border-t border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#0a0d14] py-8 text-xs text-slate-500 dark:text-slate-400 transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-black text-[#5B0601] dark:text-white text-sm">
+            <span className="font-black text-[#7a0f2d] dark:text-[#ffead1] text-sm">
               {SITE_INFO.shopName}
             </span>
             <span>·</span>
@@ -1863,16 +1971,16 @@ export default function App() {
       {/* ====================================================================== */}
       {cartTotals.totalCount > 0 && !isCartOpen && (
         <div className="fixed bottom-4 left-4 right-4 z-40 max-w-xl mx-auto">
-          <div className="bg-[#5B0601] dark:bg-rose-950 text-white rounded-2xl p-3 sm:p-4 shadow-xl flex items-center justify-between gap-3 border border-white/10">
+          <div className="bg-[#7a0f2d] dark:bg-[#2a1a1f] text-white rounded-2xl p-3 sm:p-4 shadow-xl flex items-center justify-between gap-3 border border-[#b4401f]/40">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center font-black text-sm shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-white/15 text-[#ffead1] flex items-center justify-center font-black text-sm shrink-0">
                 {cartTotals.totalCount}
               </div>
               <div className="min-w-0">
-                <span className="text-[11px] uppercase tracking-wider text-rose-200 block truncate">
+                <span className="text-[11px] uppercase tracking-wider text-[#ffead1]/80 block truncate">
                   В корзине
                 </span>
-                <span className="text-base sm:text-lg font-black font-mono whitespace-nowrap inline-block">
+                <span className="text-base sm:text-lg font-black font-mono text-[#ffead1] whitespace-nowrap inline-block">
                   {cartTotals.totalPrice > 0 ? formatPrice(cartTotals.totalPrice) : 'По запросу'}
                 </span>
               </div>
@@ -1880,7 +1988,7 @@ export default function App() {
 
             <button
               onClick={() => setIsCartOpen(true)}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white text-[#5B0601] font-bold text-xs sm:text-sm hover:bg-rose-50 transition-all flex items-center gap-1.5 shadow-sm active:scale-95 shrink-0"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#ffead1] text-[#7a0f2d] font-bold text-xs sm:text-sm hover:bg-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95 shrink-0"
             >
               <span>В корзину</span>
               <ChevronRight className="w-4 h-4" />
@@ -1902,16 +2010,16 @@ export default function App() {
           />
 
           {/* Drawer Content — 100dvh for exact mobile & tablet viewport height */}
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#121622] text-slate-900 dark:text-white h-[100dvh] max-h-[100dvh] shadow-2xl flex flex-col z-10 transition-transform overscroll-contain touch-pan-y">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#0e121c] text-slate-900 dark:text-white h-[100dvh] max-h-[100dvh] shadow-2xl flex flex-col z-10 transition-transform overscroll-contain touch-pan-y">
             
             {/* Header (Non-scrolling) */}
             <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-[#5B0601] dark:text-rose-400" />
+                <ShoppingCart className="w-5 h-5 text-[#7a0f2d] dark:text-[#ffead1]" />
                 <h2 className="text-lg font-black tracking-tight">
                   Корзина товаров
                 </h2>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 font-bold text-slate-600 dark:text-slate-300">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-[#ffead1] dark:bg-[#7a0f2d]/50 font-bold text-[#7a0f2d] dark:text-[#ffead1]">
                   {cartTotals.totalCount} шт.
                 </span>
               </div>
@@ -1926,7 +2034,7 @@ export default function App() {
             </div>
 
             {/* Quick Helper Note (Non-scrolling) */}
-            <div className="px-4 py-2.5 bg-slate-50 dark:bg-[#181d2a] border-b border-slate-200/80 dark:border-white/10 text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+            <div className="px-4 py-2.5 bg-slate-50 dark:bg-[#121622] border-b border-slate-200/80 dark:border-white/10 text-[11px] text-slate-600 dark:text-slate-400 shrink-0">
               Вы можете выбрать разный способ оплаты для каждого товара (например, один через Kaspi, другой за наличные).
             </div>
 
@@ -1937,7 +2045,7 @@ export default function App() {
                   <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 mx-auto flex items-center justify-center text-slate-400">
                     <ShoppingCart className="w-8 h-8" />
                   </div>
-                  <p className="text-base font-bold text-slate-700 dark:text-slate-300">
+                  <p className="text-base font-bold text-slate-700 dark:text-[#ffead1]">
                     В корзине пока ничего нет
                   </p>
                   <p className="text-xs text-slate-400 max-w-xs mx-auto">
@@ -1945,7 +2053,7 @@ export default function App() {
                   </p>
                   <button
                     onClick={() => setIsCartOpen(false)}
-                    className="mt-2 px-4 py-2 rounded-xl bg-[#5B0601] text-white text-xs font-bold hover:bg-[#780c05] transition-colors"
+                    className="mt-2 px-4 py-2 rounded-xl bg-[#7a0f2d] text-[#ffead1] text-xs font-bold hover:bg-[#b4401f] transition-colors"
                   >
                     Перейти в каталог
                   </button>
@@ -2017,7 +2125,7 @@ export default function App() {
                                   isSelected
                                     ? pm.id === 'cash'
                                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                                      : 'bg-[#5B0601] text-white border-[#5B0601] dark:bg-rose-600 dark:border-rose-600 shadow-xs'
+                                      : 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] dark:bg-[#7a0f2d] dark:border-[#b4401f] shadow-xs'
                                     : 'bg-slate-50 dark:bg-[#121622] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300'
                                 }`}
                               >
@@ -2046,7 +2154,7 @@ export default function App() {
                           <button
                             type="button"
                             onClick={() => updateCartQuantity(index, 1)}
-                            className="p-1 rounded bg-[#5B0601] text-white hover:bg-[#780c05]"
+                            className="p-1 rounded bg-[#7a0f2d] text-[#ffead1] hover:bg-[#b4401f]"
                             aria-label="Увеличить количество"
                           >
                             <Plus className="w-3 h-3" />
@@ -2054,7 +2162,7 @@ export default function App() {
                         </div>
 
                         <div className="text-right">
-                          <div className="text-sm font-black font-mono text-[#5B0601] dark:text-rose-400 whitespace-nowrap shrink-0">
+                          <div className="text-sm font-black font-mono text-[#7a0f2d] dark:text-[#ffead1] whitespace-nowrap shrink-0">
                             {itemTotal !== null ? formatPrice(itemTotal) : 'По запросу'}
                           </div>
                           {item.paymentMethod === 'cash' && item.prices.kaspi && itemTotal !== null && (
@@ -2076,7 +2184,7 @@ export default function App() {
                 <div className="space-y-1 text-xs">
                   <div className="flex items-center justify-between gap-3 text-base sm:text-lg font-black">
                     <span className="text-slate-900 dark:text-white shrink-0">Итого к оплате:</span>
-                    <span className="text-[#5B0601] dark:text-white font-mono text-xl whitespace-nowrap shrink-0 text-right">
+                    <span className="text-[#7a0f2d] dark:text-[#ffead1] font-mono text-xl whitespace-nowrap shrink-0 text-right">
                       {formatPrice(cartTotals.totalPrice)}
                     </span>
                   </div>

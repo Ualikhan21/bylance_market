@@ -115,10 +115,10 @@ export interface ProductColor {
 
 // ГОТОВЫЕ ЦВЕТОВЫЕ НАБОРЫ (пользователь может менять картинки на свои в любое время)
 export const IPHONE_PRO_COLORS: ProductColor[] = [
-  { id: 'desert', name: 'Desert Titanium (Пустынный)', hex: '#c5b39b', image: PRODUCT_IMAGES.iphone },
-  { id: 'natural', name: 'Natural Titanium (Натуральный)', hex: '#9f9b96', image: PRODUCT_IMAGES.iphone },
-  { id: 'white', name: 'White Titanium (Белый)', hex: '#f2f1ed', image: PRODUCT_IMAGES.iphone },
-  { id: 'black', name: 'Black Titanium (Чёрный)', hex: '#3b3b3d', image: PRODUCT_IMAGES.iphone },
+  { id: 'desert', name: 'Desert Titanium (Пустынный)', hex: '#c5b39b', image: PRODUCT_IMAGES.iphoneDesert },
+  { id: 'natural', name: 'Natural Titanium (Натуральный)', hex: '#9f9b96', image: PRODUCT_IMAGES.iphoneNatural },
+  { id: 'white', name: 'White Titanium (Белый)', hex: '#f2f1ed', image: PRODUCT_IMAGES.iphoneWhite },
+  { id: 'black', name: 'Black Titanium (Чёрный)', hex: '#3b3b3d', image: PRODUCT_IMAGES.iphoneBlack },
 ];
 
 export const IPHONE_BASE_COLORS: ProductColor[] = [

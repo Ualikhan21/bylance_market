@@ -1,4 +1,7 @@
-import iphoneImg from '../assets/images/iphone_pro_studio_1793923749123.jpg';
+import iphoneDesertImg from '../assets/images/iphone_desert_titanium_1794308123869.jpg';
+import iphoneNaturalImg from '../assets/images/iphone_natural_titanium_1794308124562.jpg';
+import iphoneWhiteImg from '../assets/images/iphone_white_titanium_1794308124551.jpg';
+import iphoneBlackImg from '../assets/images/iphone_black_titanium_1794308126292.jpg';
 import macbookImg from '../assets/images/macbook_studio_1793923767706.jpg';
 import ipadImg from '../assets/images/ipad_studio_1793923784670.jpg';
 import airpodsImg from '../assets/images/airpods_studio_1793923800707.jpg';
@@ -10,7 +13,11 @@ import djiImg from '../assets/images/dji_drone_studio_1793923882878.jpg';
 import yandexImg from '../assets/images/yandex_speaker_studio_1793923897561.jpg';
 
 export const PRODUCT_IMAGES = {
-  iphone: iphoneImg,
+  iphone: iphoneDesertImg,
+  iphoneDesert: iphoneDesertImg,
+  iphoneNatural: iphoneNaturalImg,
+  iphoneWhite: iphoneWhiteImg,
+  iphoneBlack: iphoneBlackImg,
   macbook: macbookImg,
   ipad: ipadImg,
   airpods: airpodsImg,
