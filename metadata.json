@@ -1,6 +1,6 @@
 {
   "name": "Bylance",
-  "description": "Онлайн каталог оригинальной электроники Bylance в Алматы: Apple, Dyson, фототехника. Рассрочка Kaspi, Halyk, спеццены и заказ в WhatsApp.",
+  "description": "Онлайн каталог оригинальной электроники и интерактивная оценка/выкуп iPhone в Алматы: Apple, Dyson, Trade-In, рассрочка Kaspi/Halyk и заказ в WhatsApp.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

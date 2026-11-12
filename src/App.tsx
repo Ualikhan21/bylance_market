@@ -22,7 +22,13 @@ import {
   ExternalLink,
   Loader2,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Battery,
+  RotateCcw,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react';
 import {
   SITE_INFO,
@@ -34,7 +40,17 @@ import {
   ProductVariant,
   ProductColor,
   PRODUCT_MODELS,
-  formatPrice
+  formatPrice,
+  formatStorage,
+  USED_IPHONES_BUYBACK,
+  BATTERY_RULES,
+  BATTERY_PRESETS,
+  BODY_CONDITIONS,
+  EXTRAS_OPTIONS,
+  BLOCKED_REASON,
+  getEsimDeduction,
+  UsedGeneration,
+  BodyOption
 } from './data/prices';
 import { KaspiIcon, HalykIcon, PaymentMethodIcon } from './components/PaymentIcons';
 
@@ -55,6 +71,7 @@ interface CartItem {
 interface ProductImageProps {
   src: string;
   alt: string;
+  fallbackSrc?: string;
   className?: string;
   containerClassName?: string;
   size?: 'normal' | 'thumb';
@@ -63,32 +80,39 @@ interface ProductImageProps {
 const ProductImage: React.FC<ProductImageProps> = ({
   src,
   alt,
+  fallbackSrc,
   className = '',
   containerClassName = '',
   size = 'normal'
 }) => {
+  const [currentSrc, setCurrentSrc] = useState(src);
   const [loaded, setLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
+    setCurrentSrc(src);
     setLoaded(false);
     setHasError(false);
   }, [src]);
 
   const roundedCls = size === 'thumb' ? 'rounded-lg' : 'rounded-2xl';
 
+  const handleError = () => {
+    if (fallbackSrc && currentSrc !== fallbackSrc) {
+      setCurrentSrc(fallbackSrc);
+      setLoaded(false);
+    } else {
+      setHasError(true);
+    }
+  };
+
   return (
-    <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${roundedCls} ${containerClassName}`}>
+    <div className={`relative w-full h-full flex items-center justify-center overflow-hidden bg-white ${roundedCls} ${containerClassName}`}>
       {/* Loading Skeleton & Spinner Indicator */}
       {!loaded && !hasError && (
-        <div className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#ffead1]/25 to-slate-100 dark:from-[#2a1a1f] dark:to-[#1a0f13] animate-pulse z-10 transition-opacity duration-200 ${roundedCls}`}>
+        <div className={`absolute inset-0 flex flex-col items-center justify-center bg-white animate-pulse z-10 transition-opacity duration-200 ${roundedCls}`}>
           <div className="flex flex-col items-center justify-center gap-1.5">
-            <Loader2 className={`${size === 'thumb' ? 'w-4 h-4 text-[#7a0f2d] dark:text-[#ffead1]' : 'w-7 h-7 text-[#7a0f2d] dark:text-[#ffead1]'} animate-spin`} />
-            {size !== 'thumb' && (
-              <span className="text-[10px] font-medium text-slate-400 dark:text-[#ffead1]/60 tracking-wide">
-                Загрузка фото...
-              </span>
-            )}
+            <Loader2 className={`${size === 'thumb' ? 'w-4 h-4 text-[#7a0f2d]' : 'w-6 h-6 text-[#7a0f2d]'} animate-spin`} />
           </div>
         </div>
       )}
@@ -101,13 +125,13 @@ const ProductImage: React.FC<ProductImageProps> = ({
         </div>
       ) : (
         <img
-          key={src}
-          src={src}
+          key={currentSrc}
+          src={currentSrc}
           alt={alt}
           loading="eager"
           decoding="async"
           onLoad={() => setLoaded(true)}
-          onError={() => setHasError(true)}
+          onError={handleError}
           className={`${className} ${roundedCls} transition-all duration-300 ${loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
         />
       )}
@@ -128,35 +152,73 @@ const FAQ_LIST: FaqItem[] = [
   {
     id: 'faq-trade-in',
     question: 'Как работает программа Trade-In и какие устройства принимаются?',
-    answer: 'В магазине Bylance по программе Trade-In принимаются исключительно оригинальные Apple iPhone!\n\n• Оценка в магазине: точную и итоговую оценку состояния телефона (экран, корпус, True Tone, Face ID, процент износа АКБ) делает наш специалист лично в магазине в Алматы.\n• Онлайн-оценка через сайт: вы также можете предварительно попробовать рассчитать стоимость вашего iPhone онлайн через форму оценки на сайте (ссылка ниже).\n• Доплата: остаток стоимости любого нового устройства вы можете доплатить наличными с максимальной скидкой или оформить в рассрочку Kaspi / Halyk (0-0-12 / 0-0-24).\n\nВсе проверенные б/у iPhone, принятые по Trade-In, с реальными фото и процентом АКБ публикуются в нашем официальном Telegram-канале.',
+    answer: 'В магазине Bylance по программе Trade-In принимаются исключительно оригинальные Apple iPhone!\n\n• Оценка в магазине: точную и итоговую оценку состояния телефона (экран, корпус, True Tone, Face ID, процент износа АКБ) делает наш специалист лично в магазине в Алматы (пр. Абылай хана, 113).\n• Онлайн-оценка через сайт: вы также можете предварительно попробовать рассчитать стоимость вашего iPhone онлайн через форму оценки на сайте (ссылка ниже) либо отправив фото и характеристики в WhatsApp.\n• Доплата: остаток стоимости любого нового устройства вы можете доплатить наличными с максимальной скидкой или оформить в рассрочку Kaspi / Halyk (0-0-12 / 0-0-24).\n\nВсе проверенные б/у iPhone, принятые по Trade-In, с реальными фото и процентом АКБ публикуются в нашем официальном Telegram-канале.',
     hasTradeInLinks: true,
   },
   {
     id: 'faq-1',
     question: 'Как работает рассрочка Kaspi и Halyk (0-0-12 / 0-0-24)?',
-    answer: 'Оформление происходит через приложения Kaspi.kz и Halyk Bank на 3, 6, 12 или 24 месяца. Заявку можно оформить удаленно через менеджера в WhatsApp либо при личном визите в наш магазин в Алматы.'
+    answer: 'Оформление происходит через приложения Kaspi.kz и Halyk Bank на 3, 6, 12 или 24 месяца без процентов и скрытых переплат. Заявку можно оформить удаленно через менеджера в WhatsApp либо при личном визите в наш магазин в Алматы.'
   },
   {
     id: 'faq-2',
     question: 'Все ли товары в магазине новые и оригинальные?',
-    answer: 'Да, 100% техники в этом каталоге — исключительно новые оригинальные запечатанные устройства в заводской упаковке. На всю технику Apple действует официальная гарантия 1 год, на Dyson - 1 года гарантии.'
+    answer: 'Да, 100% техники в этом каталоге — исключительно новые оригинальные запечатанные устройства в заводской упаковке. На всю технику Apple действует официальная гарантия 1 год, на Dyson — 2 года гарантии.'
   },
   {
     id: 'faq-3',
+    question: 'В чем преимущество скидки за наличную оплату?',
+    answer: 'При оплате наличными или прямым переводом на карту отсутствуют банковские эквайринговые комиссии за рассрочку, поэтому мы предоставляем максимальную скидку от базовой цены (колонка «Скидка за наличную оплату»).'
+  },
+  {
+    id: 'faq-4',
+    question: 'Можно ли выбрать разные способы оплаты для разных товаров в одном заказе?',
+    answer: 'Да! Вы можете прямо в корзине или в карточке товара назначить для каждого устройства свой способ оплаты — например, один телефон оформить в Kaspi рассрочку, а второй оплатить со скидкой за наличные.'
+  },
+  {
+    id: 'faq-5',
     question: 'Как быстро оформить заказ через WhatsApp?',
     answer: 'Вы можете нажать кнопку «Заказать сразу в WhatsApp» на карточке любого товара для мгновенного заказа в 1 клик, либо набрать корзину и отправить общий заказ. Менеджер мгновенно получит готовую спецификацию и подтвердит бронь.'
   },
   {
-    id: 'faq-4',
+    id: 'faq-6',
     question: 'Где находится магазин и можно ли забрать самовывозом?',
-    answer: 'Наш магазин расположен в г. Алматы на проспекте Абылай хана. Вы можете приехать к нам лично, вскрыть и проверить запечатанную коробку, активировать устройство на месте и оплатить удобным способом.'
+    answer: 'Наш магазин расположен в г. Алматы на проспекте Абылай хана, 113. Вы можете приехать к нам лично, вскрыть и проверить запечатанную коробку, активировать устройство на месте и оплатить удобным способом.'
   },
   {
-    id: 'faq-5',
+    id: 'faq-7',
     question: 'Где посмотреть каталог проверенной Б/У техники по Trade-In?',
     answer: 'Вся проверенная Б/У техника и устройства, принятые по программе Trade-In, выкладываются исключительно в нашем Telegram-канале с подробными живыми фотографиями, процентом АКБ и актуальными ценами.',
     hasTelegramLink: true,
   }
+];
+
+const VALUATION_FAQ_LIST: FaqItem[] = [
+  {
+    id: 'vfaq-1',
+    question: 'Какие модели iPhone вы принимаете на выкуп и в Trade-In?',
+    answer: 'Мы принимаем оригинальные Apple iPhone от iPhone X, XR, XS до iPhone 16 Pro Max. Устройство не должно иметь чужого Apple ID (Activation Lock), блокировки оператора или пароля на экране.',
+  },
+  {
+    id: 'vfaq-2',
+    question: 'Как и где проходит диагностика и выплата денег?',
+    answer: 'Вы приезжаете в наш магазин в Алматы (пр. Абылай хана, 113). Мастер при вас за 5–10 минут проверяет функции (дисплей, True Tone, Face ID, камеры, АКБ). Деньги выплачиваются моментально на месте: наличными или переводом на Kaspi Gold.',
+  },
+  {
+    id: 'vfaq-3',
+    question: 'Как использовать сумму выкупа для покупки нового телефона (Trade-In)?',
+    answer: 'Сумма предварительной оценки сразу вычитается из стоимости любого нового устройства из нашего каталога (Apple, Dyson, фототехника). Оставшуюся разницу вы можете доплатить наличными или оформить в рассрочку Kaspi / Halyk (0-0-12 / 0-0-24).',
+  },
+  {
+    id: 'vfaq-4',
+    question: 'Принимаются ли устройства с замененными экранами или АКБ?',
+    answer: 'Да! В шаге 6 просто укажите «Менялся дисплей» или «Менялся аккумулятор». Калькулятор автоматически пересчитает честную стоимость.',
+  },
+  {
+    id: 'vfaq-5',
+    question: 'Обязательно ли иметь коробку и комплект?',
+    answer: 'Комплект необязателен. Но если у вас сохранилась оригинальная коробка, мы начислим дополнительный бонус (отметьте пункт «Есть оригинальная коробка» в шаге 6).',
+  },
 ];
 
 export default function App() {
@@ -232,6 +294,192 @@ export default function App() {
     size?: string;
     paymentMethod?: PaymentMethodId;
   }>>({});
+
+  // ---------------------------------------------------------------------------
+  // ⭐️ IPHONE VALUATION & TRADE-IN CALCULATOR (FROM BYLANCE_VALUATION)
+  // ---------------------------------------------------------------------------
+  const [selectedGen, setSelectedGen] = useState<UsedGeneration>(() => USED_IPHONES_BUYBACK[2] || USED_IPHONES_BUYBACK[0]); // iPhone 16
+  const [selectedModel, setSelectedModel] = useState<UsedGeneration['models'][0]>(() => {
+    const defaultGen = USED_IPHONES_BUYBACK[2] || USED_IPHONES_BUYBACK[0];
+    return defaultGen.models[1] || defaultGen.models[0]; // iPhone 16
+  });
+  const [selectedStorage, setSelectedStorage] = useState<number>(128);
+  const [batteryPct, setBatteryPct] = useState<number>(90);
+  const [selectedBody, setSelectedBody] = useState<BodyOption>(BODY_CONDITIONS[0]); // Идеальное
+  const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({});
+  const [isBlocked, setIsBlocked] = useState<boolean>(false);
+  const [copiedValuation, setCopiedValuation] = useState<boolean>(false);
+  const [tradeInApplied, setTradeInApplied] = useState<{
+    modelName: string;
+    storage: number;
+    price: number;
+  } | null>(null);
+
+  const handleSelectGen = useCallback((gen: UsedGeneration) => {
+    setSelectedGen(gen);
+    const firstModel = gen.models[0];
+    setSelectedModel(firstModel);
+    if (firstModel) {
+      const storages = Object.keys(firstModel.prices).map(Number);
+      setSelectedStorage(storages[0]);
+    }
+  }, []);
+
+  const handleSelectModel = useCallback((model: UsedGeneration['models'][0]) => {
+    setSelectedModel(model);
+    const storages = Object.keys(model.prices).map(Number);
+    if (!model.prices[selectedStorage]) {
+      setSelectedStorage(storages[0]);
+    }
+  }, [selectedStorage]);
+
+  const toggleExtra = useCallback((id: string) => {
+    setSelectedExtras((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      if (id === 'replaced_screen_orig' && next[id]) {
+        next.replaced_screen = false;
+      } else if (id === 'replaced_screen' && next[id]) {
+        next.replaced_screen_orig = false;
+      }
+      return next;
+    });
+  }, []);
+
+  const handleResetValuation = useCallback(() => {
+    const defaultGen = USED_IPHONES_BUYBACK[2] || USED_IPHONES_BUYBACK[0];
+    setSelectedGen(defaultGen);
+    setSelectedModel(defaultGen.models[1] || defaultGen.models[0]);
+    setSelectedStorage(128);
+    setBatteryPct(90);
+    setSelectedBody(BODY_CONDITIONS[0]);
+    setSelectedExtras({});
+    setIsBlocked(false);
+  }, []);
+
+  // Valuation Calculation Logic
+  const calculation = useMemo(() => {
+    if (isBlocked) {
+      return {
+        price: 0,
+        canBuy: false,
+        reason: 'Телефоны с блокировкой iCloud или чужим Apple ID мы не покупаем.',
+        activeExtrasLabels: [],
+      };
+    }
+    const basePrice = selectedModel.prices[selectedStorage] || 0;
+    let batteryCut = 0;
+    for (const rule of BATTERY_RULES) {
+      if (batteryPct >= rule.min) {
+        batteryCut = rule.cut;
+        break;
+      }
+    }
+    const bodyCut = selectedBody.cut;
+    let extrasCut = 0;
+    let fixedExtraCut = 0;
+    const activeExtrasLabels: string[] = [];
+
+    EXTRAS_OPTIONS.forEach((extra) => {
+      if (selectedExtras[extra.id]) {
+        if (extra.isEsimOnly) {
+          const esimCut = getEsimDeduction(selectedModel.name);
+          fixedExtraCut += esimCut;
+          activeExtrasLabels.push(`только eSIM (-${formatPrice(esimCut)})`);
+        } else {
+          extrasCut += extra.cut;
+          activeExtrasLabels.push(extra.label.toLowerCase());
+        }
+      }
+    });
+
+    const totalCut = Math.min(batteryCut + bodyCut + extrasCut, 90);
+    const priceAfterPct = Math.max(0, basePrice * (1 - totalCut / 100));
+    const price = Math.max(
+      0,
+      Math.round((priceAfterPct - fixedExtraCut) / SITE_INFO.roundTo) * SITE_INFO.roundTo
+    );
+
+    return {
+      price,
+      canBuy: true,
+      activeExtrasLabels,
+    };
+  }, [selectedModel, selectedStorage, batteryPct, selectedBody, selectedExtras, isBlocked]);
+
+  // WhatsApp prefilled URL for Sell / Valuation
+  const waUrlSell = useMemo(() => {
+    if (!calculation.canBuy) {
+      return `https://wa.me/${SITE_INFO.whatsapp}`;
+    }
+    const msg = [
+      `Здравствуйте! Хочу продать iPhone в ${SITE_INFO.shopName}.`,
+      `• Модель: ${selectedModel.name} (${formatStorage(selectedStorage)})`,
+      `• Аккумулятор: ${batteryPct}%`,
+      `• Корпус: ${selectedBody.label} (${selectedBody.hint})`,
+      calculation.activeExtrasLabels.length > 0
+        ? `• Особенности: ${calculation.activeExtrasLabels.join(', ')}`
+        : null,
+      `• Оценка на сайте: ${formatPrice(calculation.price)}`,
+      `\nКогда можно приехать на проверку в магазин на пр. Абылай хана?`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    return `https://wa.me/${SITE_INFO.whatsapp}?text=${encodeURIComponent(msg)}`;
+  }, [calculation, selectedModel, selectedStorage, batteryPct, selectedBody]);
+
+  const copyValuationSummary = useCallback(() => {
+    const summary = `${selectedModel.name} ${formatStorage(selectedStorage)}, АКБ ${batteryPct}%, ${selectedBody.label}. Оценка Bylance: ${formatPrice(calculation.price)}`;
+    navigator.clipboard.writeText(summary);
+    setCopiedValuation(true);
+    setTimeout(() => setCopiedValuation(false), 2000);
+  }, [selectedModel, selectedStorage, batteryPct, selectedBody, calculation.price]);
+
+  // Active Page Navigation ('catalog' or 'valuation')
+  const [activePage, setActivePage] = useState<'catalog' | 'valuation'>(() => {
+    if (typeof window !== 'undefined') {
+      const h = window.location.hash.toLowerCase();
+      if (h.includes('val') || h.includes('trade-in') || h.includes('calc')) {
+        return 'valuation';
+      }
+    }
+    return 'catalog';
+  });
+
+  const navigateTo = useCallback((page: 'catalog' | 'valuation') => {
+    setActivePage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      window.history.pushState(null, '', `#${page}`);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const handleHash = () => {
+      const h = window.location.hash.toLowerCase();
+      if (h.includes('val') || h.includes('trade-in') || h.includes('calc')) {
+        setActivePage('valuation');
+      } else if (h.includes('cat')) {
+        setActivePage('catalog');
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  const handleApplyTradeIn = useCallback(() => {
+    if (!calculation.canBuy || calculation.price <= 0) return;
+    setTradeInApplied({
+      modelName: `${selectedModel.name} (${formatStorage(selectedStorage)})`,
+      storage: selectedStorage,
+      price: calculation.price,
+    });
+    // Switch to catalog page
+    setActivePage('catalog');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      window.history.pushState(null, '', '#catalog');
+    } catch {}
+  }, [calculation, selectedModel, selectedStorage]);
 
   // 3. CART STATE (saved in localStorage)
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -511,10 +759,18 @@ export default function App() {
       : '0 ₸';
 
     const totalSuffix = cartTotals.hasUnpricedItems ? ' (без учета позиций с ценой по запросу)' : '';
-    lines.push(`Итого: ${formattedTotal}${totalSuffix}.`);
+    lines.push(`Сумма товаров: ${formattedTotal}${totalSuffix}`);
+
+    if (tradeInApplied) {
+      lines.push(`• Зачет Trade-In (${tradeInApplied.modelName}): -${formatPrice(tradeInApplied.price)}`);
+      const finalToPay = Math.max(0, cartTotals.totalPrice - tradeInApplied.price);
+      lines.push(`• Итого к доплате с учетом Trade-In: ${formatPrice(finalToPay)}`);
+    } else {
+      lines.push(`Итого к оплате: ${formattedTotal}${totalSuffix}.`);
+    }
 
     return lines.join('\n');
-  }, [cart, cartTotals]);
+  }, [cart, cartTotals, tradeInApplied]);
 
   const handleCheckoutWhatsApp = useCallback(() => {
     if (cart.length === 0) return;
@@ -552,47 +808,92 @@ export default function App() {
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Logo & Brand: 'Bylance' is pure white in dark mode */}
-            <a href="#" className="flex items-center gap-2.5 focus-visible:outline-none">
+            {/* Logo & Brand: Clicking Logo returns to catalog, identical layout on mobile & desktop */}
+            <button
+              type="button"
+              onClick={() => navigateTo('catalog')}
+              className="flex items-center gap-2.5 focus-visible:outline-none text-left cursor-pointer active:scale-95 transition-transform"
+              aria-label="В каталог Bylance"
+            >
               <img
                 src={logoSrc}
                 alt={SITE_INFO.shopName}
-                className="h-8 sm:h-10 w-auto object-contain rounded-lg shadow-sm"
+                className="h-8 sm:h-10 w-auto object-contain rounded-lg shadow-sm shrink-0"
                 onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
               />
-              <div className="hidden sm:flex flex-col">
-                <span className="text-xl font-black tracking-tight text-[#7a0f2d] dark:text-[#ffead1] transition-colors">
+              <div className="flex flex-col">
+                <span className="text-lg sm:text-xl font-black tracking-tight text-[#7a0f2d] dark:text-[#ffead1] transition-colors leading-tight">
                   {SITE_INFO.shopName}
                 </span>
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-[#ffead1]/70">
+                <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-[#ffead1]/70 leading-none">
                   Электроника в Алматы
                 </span>
               </div>
-            </a>
+            </button>
           </div>
 
-          {/* Top Header Navigation */}
-          <nav className="flex items-center gap-1.5 sm:gap-3 text-xs sm:text-sm font-bold text-slate-700 dark:text-[#ffead1]/90">
-            <a
-              href="#catalog"
-              className="py-1 px-2 rounded-lg hover:text-[#7a0f2d] dark:hover:text-[#ffead1] hover:bg-[#ffead1]/30 dark:hover:bg-white/5 transition-colors"
+          {/* Center Navigation: ONE unified segmented switcher button between Catalog and Trade-In + smooth links */}
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600 dark:text-slate-300">
+            {/* The single unified switcher button */}
+            <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-white/10 border border-slate-200/80 dark:border-white/10 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => {
+                  navigateTo('catalog');
+                  setTimeout(() => document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' }), 50);
+                }}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
+                  activePage === 'catalog'
+                    ? 'bg-[#7a0f2d] text-[#ffead1] shadow-xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+                <span>Каталог</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo('valuation')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
+                  activePage === 'valuation'
+                    ? 'bg-[#7a0f2d] text-[#ffead1] shadow-xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Trade-In</span>
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                navigateTo('catalog');
+                setTimeout(() => document.getElementById('founder')?.scrollIntoView({ behavior: 'smooth' }), 50);
+              }}
+              className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
             >
-              Каталог
-            </a>
-            <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
-            <a
-              href="#faq"
-              className="py-1 px-2 rounded-lg hover:text-[#7a0f2d] dark:hover:text-[#ffead1] hover:bg-[#ffead1]/30 dark:hover:bg-white/5 transition-colors"
+              Об основательнице
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                navigateTo('catalog');
+                setTimeout(() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }), 50);
+              }}
+              className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
             >
               FAQ
-            </a>
-            <span className="text-slate-300 dark:text-slate-700 select-none">·</span>
-            <a
-              href="#contacts"
-              className="py-1 px-2 rounded-lg hover:text-[#7a0f2d] dark:hover:text-[#ffead1] hover:bg-[#ffead1]/30 dark:hover:bg-white/5 transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                navigateTo('catalog');
+                setTimeout(() => document.getElementById('contacts')?.scrollIntoView({ behavior: 'smooth' }), 50);
+              }}
+              className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
             >
-              О нас
-            </a>
+              Контакты
+            </button>
           </nav>
 
           {/* Header Actions */}
@@ -659,6 +960,7 @@ export default function App() {
                 onClick={() => {
                   setSelectedCategory('all');
                   setSelectedSubcategory('all');
+                  navigateTo('catalog');
                   setIsMobileMenuOpen(false);
                   setTimeout(() => {
                     document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
@@ -678,6 +980,7 @@ export default function App() {
                 onClick={() => {
                   setSelectedCategory('apple');
                   setSelectedSubcategory('all');
+                  navigateTo('catalog');
                   setIsMobileMenuOpen(false);
                   setTimeout(() => {
                     document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
@@ -699,6 +1002,7 @@ export default function App() {
                 onClick={() => {
                   setSelectedCategory('dyson');
                   setSelectedSubcategory('all');
+                  navigateTo('catalog');
                   setIsMobileMenuOpen(false);
                   setTimeout(() => {
                     document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
@@ -720,6 +1024,7 @@ export default function App() {
                 onClick={() => {
                   setSelectedCategory('other');
                   setSelectedSubcategory('all');
+                  navigateTo('catalog');
                   setIsMobileMenuOpen(false);
                   setTimeout(() => {
                     document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
@@ -738,48 +1043,90 @@ export default function App() {
               </button>
             </div>
 
-            {/* Sections in Store */}
-            <div className="space-y-1 pt-3 border-t border-slate-200 dark:border-white/10">
+            {/* Pages & Sections in Store */}
+            <div className="space-y-1.5 pt-3 border-t border-slate-200 dark:border-white/10">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-                Разделы магазина:
+                Страницы:
               </span>
-              <a
-                href="#catalog"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+              <button
+                type="button"
+                onClick={() => {
+                  navigateTo('catalog');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full py-2.5 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
+                  activePage === 'catalog'
+                    ? 'bg-[#7a0f2d] text-[#ffead1]'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                }`}
               >
-                Каталог товаров
-              </a>
-              <a
-                href="#trade-in"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-between"
+                <span>🛍️ Каталог новых устройств</span>
+                <span className="text-[10px] opacity-80">Магазин</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigateTo('valuation');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full py-2.5 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
+                  activePage === 'valuation'
+                    ? 'bg-amber-500 text-slate-950 font-black'
+                    : 'text-amber-700 dark:text-amber-400 hover:bg-amber-500/10'
+                }`}
               >
-                <span>Программа Trade-In</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold">Обмен</span>
-              </a>
-              <a
-                href="#founder"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-rose-700 dark:text-rose-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-between"
+                <span>🔄 Оценка и Trade-In iPhone</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold">
+                  Trade-In
+                </span>
+              </button>
+
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block pt-2 mb-1">
+                Разделы:
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (activePage !== 'valuation') navigateTo('valuation');
+                  setIsMobileMenuOpen(false);
+                  setTimeout(() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                }}
+                className="w-full text-left py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+              >
+                Как работает выкуп (3 шага)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (activePage !== 'catalog') navigateTo('catalog');
+                  setIsMobileMenuOpen(false);
+                  setTimeout(() => document.getElementById('founder')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                }}
+                className="w-full text-left py-1.5 px-3 rounded-lg text-xs font-semibold text-rose-700 dark:text-rose-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-between cursor-pointer"
               >
                 <span>Аружан Жеткерген</span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300 font-bold">Основательница</span>
-              </a>
-              <a
-                href="#faq"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setTimeout(() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                }}
+                className="w-full text-left py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
               >
                 Частые вопросы (FAQ)
-              </a>
-              <a
-                href="#contacts"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setTimeout(() => document.getElementById('contacts')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                }}
+                className="w-full text-left py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
               >
                 Контакты в Алматы
-              </a>
+              </button>
             </div>
 
             {/* Telegram Б/У Callout */}
@@ -819,8 +1166,40 @@ export default function App() {
       {/* ====================================================================== */}
       {/* MAIN CONTAINER                                                         */}
       {/* ====================================================================== */}
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-10">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-28 md:pb-12">
+        
+        {/* ONE UNIFIED SWITCHER BUTTON BETWEEN CATALOG AND TRADE-IN */}
+        <div className="flex justify-center -mt-2 sm:-mt-3">
+          <div className="inline-flex p-1 rounded-2xl bg-slate-100 dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-xs">
+            <button
+              type="button"
+              onClick={() => navigateTo('catalog')}
+              className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer flex items-center gap-2 active:scale-95 ${
+                activePage === 'catalog'
+                  ? 'bg-white dark:bg-[#1c2333] text-[#7a0f2d] dark:text-[#ffead1] shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4 text-[#7a0f2d] dark:text-[#ffead1]" />
+              <span>Каталог товаров</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateTo('valuation')}
+              className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer flex items-center gap-2 active:scale-95 ${
+                activePage === 'valuation'
+                  ? 'bg-white dark:bg-[#1c2333] text-amber-600 dark:text-amber-400 shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <RefreshCw className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span>Оценка и Trade-In</span>
+            </button>
+          </div>
+        </div>
 
+        {activePage === 'catalog' && (
+          <>
         {/* ====================================================================== */}
         {/* 1. CATALOG SECTION (IMMEDIATELY VISIBLE ON FIRST SCREEN)                */}
         {/* ====================================================================== */}
@@ -860,32 +1239,40 @@ export default function App() {
             </div>
           </div>
 
-          {/* TRADE-IN BANNER & HIGHLIGHT (YELLOW / AMBER IN DARK MODE AS REQUESTED) */}
-          <div id="trade-in" className="scroll-mt-20 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-yellow-500/10 dark:from-amber-950/60 dark:via-yellow-950/40 dark:to-amber-900/40 border border-amber-300 dark:border-amber-500/40 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-3 text-center sm:text-left min-w-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
-                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+          {/* APPLIED TRADE-IN DISCOUNT (if calculated by user) */}
+          {tradeInApplied && (
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-950 dark:text-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-black">
+                    Учтен ваш Trade-In: {tradeInApplied.modelName}
+                  </div>
+                  <div className="text-[11px] text-emerald-800 dark:text-emerald-300/80">
+                    Скидка <span className="font-bold font-mono text-xs">{formatPrice(tradeInApplied.price)}</span> на покупку любого нового устройства!
+                  </div>
+                </div>
               </div>
-              <div className="min-w-0">
-                <h2 className="text-xs sm:text-sm md:text-base font-black text-slate-900 dark:text-amber-300 leading-snug">
-                  Обменяйте старый iPhone на любую новую технику с доплатой
-                </h2>
-                <p className="text-[11px] text-slate-600 dark:text-amber-200/80">
-                  Принимаются только Apple iPhone · Онлайн-оценка за 5 минут у сотрудника
-                </p>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('valuation')}
+                  className="px-3 py-1.5 rounded-xl bg-white/70 dark:bg-white/10 hover:bg-white text-xs font-bold transition-all border border-emerald-500/30 cursor-pointer"
+                >
+                  Изменить оценку
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTradeInApplied(null)}
+                  className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 text-xs font-bold transition-all cursor-pointer"
+                >
+                  Сбросить
+                </button>
               </div>
             </div>
-
-            <a
-              href="https://bylance.kz/trade-in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 dark:bg-amber-400 dark:hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer"
-            >
-              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-              <span>Онлайн-оценка на сайте ↗</span>
-            </a>
-          </div>
+          )}
 
           {/* Quick Global Payment Mode Selector Pills (Switches all catalog prices) */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
@@ -1043,15 +1430,18 @@ export default function App() {
                     className="rounded-2xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group"
                   >
                     <div>
-                      {/* Product Studio Photo Container */}
-                      <div className="w-full aspect-square bg-slate-50 dark:bg-[#0e121c] p-4 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-white/5 relative">
-                        <ProductImage
-                          src={displayImage}
-                          alt={model.name}
-                          className="w-full h-full object-contain rounded-2xl group-hover:scale-105 transition-transform duration-300"
-                        />
+                      {/* Product Photo Container: Compact size, rounded corners, pure white background */}
+                      <div className="w-full h-52 sm:h-56 bg-white dark:bg-white p-5 flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-100 relative rounded-t-2xl">
+                        <div className="w-full h-full flex items-center justify-center bg-white rounded-2xl p-1">
+                          <ProductImage
+                            src={displayImage}
+                            alt={model.name}
+                            fallbackSrc={model.image}
+                            className="max-h-36 sm:max-h-42 w-auto max-w-[85%] object-contain rounded-2xl group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
                         {activeColor && (
-                          <span className="absolute bottom-3 right-3 text-[10px] font-bold tracking-wide px-2.5 py-0.5 rounded-full bg-white/90 dark:bg-[#181d2a]/90 backdrop-blur-xs text-slate-800 dark:text-slate-200 border border-black/5 dark:border-white/10 shadow-2xs pointer-events-none">
+                          <span className="absolute bottom-2.5 right-2.5 text-[10px] font-bold tracking-wide px-2.5 py-0.5 rounded-full bg-slate-900/85 backdrop-blur-xs text-white border border-white/20 shadow-2xs pointer-events-none">
                             {activeColor.name}
                           </span>
                         )}
@@ -1075,7 +1465,7 @@ export default function App() {
                           </h3>
                         </div>
 
-                        {/* SELECTOR: COLOR SELECTION WITH ENLARGED SQUARE PICTURE THUMBNAILS */}
+                        {/* SELECTOR: COLOR SELECTION WITH COMPACT ROUNDED WHITE THUMBNAILS */}
                         {model.colorOptions && model.colorOptions.length > 0 && (
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-xs">
@@ -1095,25 +1485,25 @@ export default function App() {
                                     type="button"
                                     onClick={() => updateCardSelection(model.id, { colorId: col.id })}
                                     title={col.name}
-                                    className={`group/color relative rounded-2xl border-2 transition-all flex items-center justify-center shrink-0 active:scale-95 cursor-pointer overflow-hidden ${
+                                    className={`group/color relative rounded-xl border-2 transition-all flex items-center justify-center shrink-0 active:scale-95 cursor-pointer overflow-hidden ${
                                       isColSel
                                         ? 'border-[#7a0f2d] dark:border-[#ffead1] ring-2 ring-[#b4401f]/40 dark:ring-[#ffead1]/30 scale-105 shadow-md'
                                         : 'border-slate-200 dark:border-white/10 hover:border-[#b4401f]/60 dark:hover:border-white/40 hover:scale-[1.02]'
                                     }`}
                                   >
-                                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 dark:bg-[#0e121c] flex items-center justify-center relative shadow-inner overflow-hidden">
+                                    <div className="w-11 h-11 sm:w-12 sm:h-12 bg-white flex items-center justify-center relative rounded-xl p-1 overflow-hidden shadow-2xs">
                                       <img
                                         src={col.image}
                                         alt={col.name}
                                         loading="lazy"
-                                        className="w-full h-full object-cover transition-transform duration-300 group-hover/color:scale-110"
+                                        className="w-full h-full object-contain rounded-lg transition-transform duration-300 group-hover/color:scale-110"
                                         onError={(e) => {
                                           (e.currentTarget as HTMLElement).style.display = 'none';
                                         }}
                                       />
                                       {col.hex && (
                                         <span
-                                          className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 border-white dark:border-[#121622] absolute bottom-1 right-1 shadow-sm pointer-events-none"
+                                          className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border-2 border-white absolute bottom-0.5 right-0.5 shadow-sm pointer-events-none"
                                           style={{ backgroundColor: col.hex }}
                                         />
                                       )}
@@ -1241,27 +1631,27 @@ export default function App() {
                           <span className="font-black text-xs sm:text-sm text-[#F14635] block tracking-tight">
                             Kaspi
                           </span>
-                          <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium block mt-0.5">
+                          <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-semibold block mt-0.5">
                             рассрочка
                           </span>
                         </div>
 
                         <div className="text-center sm:text-left flex-1 px-1 min-w-0">
-                          <span className="font-black font-mono text-xs sm:text-sm md:text-base xl:text-lg text-[#2a1a1f] whitespace-nowrap block truncate">
+                          <span className="font-black font-mono text-base sm:text-base md:text-lg xl:text-xl text-[#2a1a1f] whitespace-nowrap block truncate">
                             {kaspiPrice !== null ? formatPrice(kaspiPrice) : 'По запросу'}
                           </span>
                         </div>
 
                         <div className="shrink-0 text-right leading-tight space-y-0.5">
                           <div className="flex items-center justify-end gap-1 sm:gap-1.5 text-right">
-                            <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium">12 мес</span>
-                            <span className="font-black text-[11px] sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                            <span className="text-[10px] sm:text-xs text-[#8a7267] font-semibold">12 мес</span>
+                            <span className="font-black text-xs sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
                               {kaspi12 !== null ? formatPrice(kaspi12).replace(' ₸', '') : '—'}
                             </span>
                           </div>
                           <div className="flex items-center justify-end gap-1 sm:gap-1.5 text-right">
-                            <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium">24 мес</span>
-                            <span className="font-black text-[11px] sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                            <span className="text-[10px] sm:text-xs text-[#8a7267] font-semibold">24 мес</span>
+                            <span className="font-black text-xs sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
                               {kaspi24 !== null ? formatPrice(kaspi24).replace(' ₸', '') : '—'}
                             </span>
                           </div>
@@ -1282,27 +1672,27 @@ export default function App() {
                           <span className="font-black text-xs sm:text-sm text-[#007A53] block tracking-tight">
                             Halyk
                           </span>
-                          <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium block mt-0.5">
+                          <span className="text-[10px] sm:text-[11px] text-[#8a7267] font-semibold block mt-0.5">
                             рассрочка
                           </span>
                         </div>
 
                         <div className="text-center sm:text-left flex-1 px-1 min-w-0">
-                          <span className="font-black font-mono text-xs sm:text-sm md:text-base xl:text-lg text-[#2a1a1f] whitespace-nowrap block truncate">
+                          <span className="font-black font-mono text-base sm:text-base md:text-lg xl:text-xl text-[#2a1a1f] whitespace-nowrap block truncate">
                             {halykPrice !== null ? formatPrice(halykPrice) : 'По запросу'}
                           </span>
                         </div>
 
                         <div className="shrink-0 text-right leading-tight space-y-0.5">
                           <div className="flex items-center justify-end gap-1 sm:gap-1.5 text-right">
-                            <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium">12 мес</span>
-                            <span className="font-black text-[11px] sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                            <span className="text-[10px] sm:text-xs text-[#8a7267] font-semibold">12 мес</span>
+                            <span className="font-black text-xs sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
                               {halyk12 !== null ? formatPrice(halyk12).replace(' ₸', '') : '—'}
                             </span>
                           </div>
                           <div className="flex items-center justify-end gap-1 sm:gap-1.5 text-right">
-                            <span className="text-[9px] sm:text-[10px] text-[#8a7267] font-medium">24 мес</span>
-                            <span className="font-black text-[11px] sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
+                            <span className="text-[10px] sm:text-xs text-[#8a7267] font-semibold">24 мес</span>
+                            <span className="font-black text-xs sm:text-xs xl:text-sm text-[#7a0f2d] font-mono whitespace-nowrap">
                               {halyk24 !== null ? formatPrice(halyk24).replace(' ₸', '') : '—'}
                             </span>
                           </div>
@@ -1315,22 +1705,22 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => updateCardSelection(model.id, { paymentMethod: 'promo' })}
-                          className={`w-full text-left rounded-2xl bg-[#7a0f2d] hover:bg-[#8e1236] text-white p-2 sm:p-2.5 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] min-w-0 overflow-hidden ${
+                          className={`w-full text-left rounded-2xl bg-[#7a0f2d] hover:bg-[#8e1236] text-white p-2.5 sm:p-3 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] min-w-0 overflow-hidden ${
                             itemPayment === 'promo'
                               ? 'ring-2 ring-white ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
                               : 'opacity-95 hover:opacity-100'
                           }`}
                         >
                           <div>
-                            <span className="font-black text-[11px] sm:text-xs uppercase tracking-wide block leading-none">
+                            <span className="font-black text-xs uppercase tracking-wide block leading-none">
                               АКЦИЯ
                             </span>
-                            <span className="text-[9px] sm:text-[10px] text-[#ffead1]/90 font-medium block mt-1 leading-tight truncate">
+                            <span className="text-[10px] text-[#ffead1]/90 font-medium block mt-1 leading-tight truncate">
                               при онлайн-оплате
                             </span>
                           </div>
-                          <div className="mt-2">
-                            <span className="font-black font-mono text-xs sm:text-sm md:text-base text-white block whitespace-nowrap leading-none truncate">
+                          <div className="mt-2.5">
+                            <span className="font-black font-mono text-sm sm:text-base md:text-lg text-white block whitespace-nowrap leading-none truncate">
                               {promoPrice !== null ? formatPrice(promoPrice) : 'По запросу'}
                             </span>
                           </div>
@@ -1340,22 +1730,22 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => updateCardSelection(model.id, { paymentMethod: 'cash' })}
-                          className={`w-full text-left rounded-2xl bg-[#2a1a1f] hover:bg-[#3d262d] text-white p-2 sm:p-2.5 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] min-w-0 overflow-hidden ${
+                          className={`w-full text-left rounded-2xl bg-[#2a1a1f] hover:bg-[#3d262d] text-white p-2.5 sm:p-3 transition-all flex flex-col justify-between shadow-2xs relative cursor-pointer active:scale-[0.99] min-w-0 overflow-hidden ${
                             itemPayment === 'cash'
                               ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-white dark:ring-offset-[#121622] scale-[1.01]'
                               : 'opacity-95 hover:opacity-100'
                           }`}
                         >
                           <div>
-                            <span className="font-black text-[11px] sm:text-xs uppercase tracking-wide block leading-none">
+                            <span className="font-black text-xs uppercase tracking-wide block leading-none">
                               НАЛИЧНЫМИ
                             </span>
-                            <span className="text-[9px] sm:text-[10px] text-[#ffead1]/80 font-medium block mt-1 leading-tight truncate">
+                            <span className="text-[10px] text-[#ffead1]/80 font-medium block mt-1 leading-tight truncate">
                               бумажные деньги
                             </span>
                           </div>
-                          <div className="mt-2">
-                            <span className="font-black font-mono text-xs sm:text-sm md:text-base text-white block whitespace-nowrap leading-none truncate">
+                          <div className="mt-2.5">
+                            <span className="font-black font-mono text-sm sm:text-base md:text-lg text-white block whitespace-nowrap leading-none truncate">
                               {cashPrice !== null ? formatPrice(cashPrice) : 'По запросу'}
                             </span>
                           </div>
@@ -1387,6 +1777,31 @@ export default function App() {
                               : 'В корзину'}
                           </span>
                         </button>
+
+                        {/* Trade-In Quick Button or Applied Status */}
+                        {model.category === 'apple' && (
+                          <div className="pt-1">
+                            {tradeInApplied ? (
+                              <div className="py-1.5 px-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] flex items-center justify-between">
+                                <span className="text-emerald-800 dark:text-emerald-300 font-semibold truncate">
+                                  Trade-In ({tradeInApplied.modelName}):
+                                </span>
+                                <span className="font-mono font-black text-emerald-700 dark:text-emerald-300 ml-1 shrink-0">
+                                  -{formatPrice(tradeInApplied.price)}
+                                </span>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => navigateTo('valuation')}
+                                className="w-full py-1.5 px-2 rounded-xl text-[11px] font-bold text-amber-700 dark:text-amber-300 hover:bg-amber-500/10 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                              >
+                                <RefreshCw className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                                <span>Сдать старый iPhone по Trade-In</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -1397,9 +1812,34 @@ export default function App() {
           )}
         </section>
 
-        {/* ====================================================================== */}
-        {/* FOUNDER & STORE STORY: АРУЖАН ЖЕТКЕРГЕН                                */}
-        {/* ====================================================================== */}
+        {/* CALLOUT BANNER: SWITCH TO VALUATION PAGE */}
+        <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-600/15 dark:from-amber-950/40 dark:via-yellow-950/20 dark:to-amber-900/40 border border-amber-300 dark:border-amber-600/40 shadow-xs flex flex-col md:flex-row items-center justify-between gap-5">
+          <div className="flex items-center gap-4 text-center md:text-left">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-sm">
+              <RefreshCw className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                Trade-In и Выкуп iPhone в Алматы
+              </div>
+              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
+                Хотите сдать свой старый iPhone или обменять на новый?
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-xl">
+                Узнайте точную стоимость вашего устройства в нашем онлайн-калькуляторе на отдельной странице оценки. Выплата сразу деньгами или скидка на новый товар!
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigateTo('valuation')}
+            className="shrink-0 px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 dark:bg-amber-400 dark:hover:bg-amber-300 text-slate-950 font-extrabold text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+          >
+            <span>Перейти к оценке iPhone</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
         {/* ====================================================================== */}
         {/* FOUNDER & STORE STORY: АРУЖАН ЖЕТКЕРГЕН                                */}
         {/* ====================================================================== */}
@@ -1659,15 +2099,14 @@ export default function App() {
 
                       {faq.hasTradeInLinks && (
                         <div className="flex flex-wrap items-center gap-2 pt-1">
-                          <a
-                            href="https://bylance.kz/trade-in"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+                          <button
+                            type="button"
+                            onClick={() => navigateTo('valuation')}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            <span>Онлайн-оценка на сайте ↗</span>
-                          </a>
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Онлайн-калькулятор оценки →</span>
+                          </button>
 
                           <a
                             href={`https://wa.me/${SITE_INFO.whatsapp}?text=${encodeURIComponent('Здравствуйте! Хочу оценить свой iPhone по программе Trade-In в магазине Bylance.')}`}
@@ -1689,12 +2128,15 @@ export default function App() {
                             <span>Канал Trade-In и Б/У в Telegram</span>
                           </a>
 
-                          <a
-                            href="#catalog"
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 font-bold text-xs transition-all"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 font-bold text-xs transition-all cursor-pointer"
                           >
-                            <span>Перейти в каталог</span>
-                          </a>
+                            <span>Наверх к каталогу ↑</span>
+                          </button>
                         </div>
                       )}
 
@@ -1728,7 +2170,7 @@ export default function App() {
                   Остались другие вопросы по товару или покупке?
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300">
-                  Напишите нам в WhatsApp — менеджер на связи ежедневно!
+                  Напишите нам в WhatsApp — менеджер на связи ежедневно и ответит за 2 минуты!
                 </p>
               </div>
 
@@ -1755,7 +2197,7 @@ export default function App() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300">
-                  Подпишитесь на наш Telegram — публикуем свежие поступления Б/У iPhone.
+                  Подпишитесь на наш Telegram — публикуем свежие поступления Б/У iPhone и Dyson с реальными фото и АКБ!
                 </p>
               </div>
 
@@ -1782,19 +2224,18 @@ export default function App() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300">
-                  По программе Trade-In принимаются только Apple iPhone. Точную оценку сделает сотрудник в магазине или онлайн!
+                  По программе Trade-In принимаются только Apple iPhone. Точную оценку сделает специалист в магазине или онлайн!
                 </p>
               </div>
 
-              <a
-                href="https://bylance.kz/trade-in"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 active:scale-95 whitespace-nowrap w-full sm:w-auto"
+              <button
+                type="button"
+                onClick={() => navigateTo('valuation')}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 active:scale-95 whitespace-nowrap w-full sm:w-auto cursor-pointer"
               >
-                <ExternalLink className="w-4 h-4" />
-                <span>Онлайн-оценка на сайте ↗</span>
-              </a>
+                <RefreshCw className="w-4 h-4" />
+                <span>Оценить в калькуляторе онлайн →</span>
+              </button>
             </div>
 
           </div>
@@ -1837,7 +2278,7 @@ export default function App() {
               <RefreshCw className="w-6 h-6 text-amber-500" />
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">Программа Trade-In</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Сдайте старый гаджет в зачёт нового с онлайн-оценкой за и минимальной доплатой.
+                Сдайте старый гаджет в зачёт нового с онлайн-оценкой за 5 минут в WhatsApp и минимальной доплатой.
               </p>
             </div>
 
@@ -1852,17 +2293,20 @@ export default function App() {
         </section>
 
         {/* ====================================================================== */}
-        {/* 8. CONTACTS SECTION                                                    */}
+        {/* 8. CONTACTS SECTION (ДВА МАГАЗИНА: ДЛЯ НОВЫХ И ДЛЯ Б/У)                */}
         {/* ====================================================================== */}
         <section id="contacts" className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <span className="text-xs font-bold text-[#7a0f2d] dark:text-[#ffead1] uppercase tracking-wider">
-                Контакты
+                Контакты и адреса
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
-                Магазин Bylance в Алматы
+                Магазины Bylance в Алматы
               </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Один магазин для новой техники, второй — для Б/У техники и Trade-In
+              </p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -1888,29 +2332,725 @@ export default function App() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100 dark:border-white/10 text-xs sm:text-sm">
+          {/* TWO STORE LOCATION CARDS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {SITE_INFO.addresses.map((addr) => {
+              const isUsed = addr.id === 'used-store';
+              return (
+                <div
+                  key={addr.id}
+                  className={`p-5 sm:p-6 rounded-2xl border transition-all ${
+                    isUsed
+                      ? 'bg-amber-500/5 dark:bg-amber-950/25 border-amber-300/80 dark:border-amber-500/40 shadow-xs'
+                      : 'bg-emerald-500/5 dark:bg-emerald-950/25 border-emerald-300/80 dark:border-emerald-500/40 shadow-xs'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
+                      {isUsed ? (
+                        <RefreshCw className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      ) : (
+                        <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      )}
+                      <span>{addr.title}</span>
+                    </span>
+                    <span
+                      className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                        isUsed
+                          ? 'bg-amber-500 text-slate-950 shadow-2xs'
+                          : 'bg-emerald-600 text-white shadow-2xs'
+                      }`}
+                    >
+                      {addr.badge}
+                    </span>
+                  </div>
+                  <p className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5 mt-1">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{addr.address}</span>
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                    {addr.description}
+                  </p>
+                  <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-xs">
+                    <span className="text-slate-500 dark:text-slate-400">
+                      Режим: <b className="text-slate-700 dark:text-slate-200 font-semibold">{addr.hours}</b>
+                    </span>
+                    <a
+                      href={addr.gis}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-0.5"
+                    >
+                      2ГИС ↗
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-100 dark:border-white/10 text-xs sm:text-sm">
             <div className="space-y-1">
-              <span className="text-slate-400 block text-xs">Адрес магазина:</span>
+              <span className="text-slate-400 block text-xs">График работы обоих магазинов:</span>
               <p className="font-semibold text-slate-800 dark:text-slate-200">
-                {SITE_INFO.address}
+                {SITE_INFO.hours} (без выходных)
               </p>
             </div>
 
             <div className="space-y-1">
-              <span className="text-slate-400 block text-xs">График работы:</span>
-              <p className="font-semibold text-slate-800 dark:text-slate-200">
-                {SITE_INFO.hours}
-              </p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-slate-400 block text-xs">Телефон и WhatsApp:</span>
+              <span className="text-slate-400 block text-xs">Телефон и WhatsApp для консультаций:</span>
               <p className="font-semibold text-slate-800 dark:text-slate-200">
                 {SITE_INFO.whatsappFormatted}
               </p>
             </div>
           </div>
         </section>
+        </>
+        )}
+
+        {/* ====================================================================== */}
+        {/* DEDICATED VALUATION PAGE (ВЫКУП И TRADE-IN IPHONE)                     */}
+        {/* ====================================================================== */}
+        {activePage === 'valuation' && (
+          <>
+            {/* 1. ⭐️ ОЦЕНКА И ВЫКУП IPHONE (ИНТЕГРАЦИЯ ИЗ BYLANCE_VALUATION) */}
+            <section id="valuation" className="space-y-6 pt-1 scroll-mt-20">
+              
+              {/* Section Header & Reset */}
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 bg-white dark:bg-[#121622] p-5 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-xs">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 text-[11px] font-black uppercase tracking-wider mb-2 border border-amber-500/30">
+                    <RefreshCw className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                    <span>Оценка iPhone · Скупка и Trade-In в Алматы</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                    Узнайте, за сколько мы купим ваш iPhone
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+                    Выберите поколение, память и состояние. Расчёт появится сразу, а заявку можно мгновенно отправить в WhatsApp или зачесть в Trade-In на новую технику.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleResetValuation}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white self-start sm:self-auto px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#181d2a] hover:bg-slate-100 dark:hover:bg-[#202738] transition-colors cursor-pointer shrink-0"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Сбросить параметры</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+                
+                {/* LEFT COLUMN: 6 STEPS */}
+                <div className="lg:col-span-7 space-y-4 sm:space-y-5">
+                  
+                  {/* STEP 1: GENERATION */}
+                  <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="w-7 h-7 rounded-full bg-[#7a0f2d] text-[#ffead1] text-xs font-black flex items-center justify-center shrink-0">
+                        1
+                      </span>
+                      <div>
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                          Поколение iPhone
+                        </h3>
+                        <p className="text-[11px] text-slate-400">Выберите линейку вашего телефона</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2">
+                      {USED_IPHONES_BUYBACK.map((g) => {
+                        const isSelected = selectedGen.gen === g.gen;
+                        return (
+                          <button
+                            key={g.gen}
+                            type="button"
+                            onClick={() => handleSelectGen(g)}
+                            className={`py-3 px-2 rounded-2xl text-center font-black text-sm transition-all border cursor-pointer active:scale-95 ${
+                              isSelected
+                                ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] shadow-sm dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]'
+                                : 'bg-slate-50 dark:bg-[#181d2a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-[#202738] hover:border-slate-300'
+                            }`}
+                          >
+                            {g.gen}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* STEP 2: VERSION / MODEL */}
+                  <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="w-7 h-7 rounded-full bg-[#7a0f2d] text-[#ffead1] text-xs font-black flex items-center justify-center shrink-0">
+                        2
+                      </span>
+                      <div>
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                          Версия модели
+                        </h3>
+                        <p className="text-[11px] text-slate-400">Выберите модификацию для iPhone {selectedGen.gen}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {selectedGen.models.map((m) => {
+                        const isSelected = selectedModel.name === m.name;
+                        return (
+                          <button
+                            key={m.name}
+                            type="button"
+                            onClick={() => handleSelectModel(m)}
+                            className={`py-3 px-3 rounded-2xl text-center font-bold text-xs sm:text-sm transition-all border cursor-pointer active:scale-95 ${
+                              isSelected
+                                ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] shadow-sm dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]'
+                                : 'bg-slate-50 dark:bg-[#181d2a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-[#202738] hover:border-slate-300'
+                            }`}
+                          >
+                            {m.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* STEP 3: STORAGE */}
+                  <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="w-7 h-7 rounded-full bg-[#7a0f2d] text-[#ffead1] text-xs font-black flex items-center justify-center shrink-0">
+                        3
+                      </span>
+                      <div>
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                          Объём встроенной памяти
+                        </h3>
+                        <p className="text-[11px] text-slate-400">Указан в Настройки → Основные → Об этом устройстве</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {Object.keys(selectedModel.prices).map((s) => {
+                        const storageNum = Number(s);
+                        const isSelected = selectedStorage === storageNum;
+                        return (
+                          <button
+                            key={storageNum}
+                            type="button"
+                            onClick={() => setSelectedStorage(storageNum)}
+                            className={`py-3 px-3 rounded-2xl text-center font-bold text-xs sm:text-sm transition-all border cursor-pointer active:scale-95 ${
+                              isSelected
+                                ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] shadow-sm dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]'
+                                : 'bg-slate-50 dark:bg-[#181d2a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-[#202738] hover:border-slate-300'
+                            }`}
+                          >
+                            {formatStorage(storageNum)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* STEP 4: BATTERY */}
+                  <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <span className="w-7 h-7 rounded-full bg-[#7a0f2d] text-[#ffead1] text-xs font-black flex items-center justify-center shrink-0">
+                          4
+                        </span>
+                        <div>
+                          <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                            Ёмкость аккумулятора (АКБ)
+                          </h3>
+                          <p className="text-[11px] text-slate-400">
+                            Настройки → Аккумулятор → Состояние аккумулятора
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#181d2a] px-3.5 py-1.5 rounded-2xl border border-slate-200/60 dark:border-white/10">
+                        <Battery className={`w-4 h-4 ${batteryPct >= 85 ? 'text-emerald-500' : batteryPct >= 80 ? 'text-amber-500' : 'text-rose-500'}`} />
+                        <span className="text-base font-black font-mono text-slate-900 dark:text-white">
+                          {batteryPct}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 pt-3">
+                      <input
+                        type="range"
+                        min={50}
+                        max={100}
+                        step={1}
+                        value={batteryPct}
+                        onChange={(e) => setBatteryPct(Number(e.target.value))}
+                        className="slider-battery"
+                        aria-label="Ёмкость аккумулятора"
+                      />
+                      <div className="flex justify-between text-xs font-semibold text-slate-400 px-1">
+                        <span>50%</span>
+                        <span>75%</span>
+                        <span>85%</span>
+                        <span>100%</span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 mr-1 font-medium">
+                          Быстрый выбор:
+                        </span>
+                        {BATTERY_PRESETS.map((pct) => (
+                          <button
+                            key={pct}
+                            type="button"
+                            onClick={() => setBatteryPct(pct)}
+                            className={`text-xs px-3 py-1.5 rounded-xl border font-bold transition-all cursor-pointer ${
+                              batteryPct === pct
+                                ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] shadow-2xs dark:bg-[#7a0f2d] dark:text-[#ffead1]'
+                                : 'bg-slate-50 dark:bg-[#181d2a] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-[#202738]'
+                            }`}
+                          >
+                            {pct}%
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* STEP 5: BODY CONDITIONS */}
+                  <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="w-7 h-7 rounded-full bg-[#7a0f2d] text-[#ffead1] text-xs font-black flex items-center justify-center shrink-0">
+                          5
+                        </span>
+                        <div>
+                          <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                            Состояние корпуса и стекла
+                          </h3>
+                          <p className="text-[11px] text-slate-400">Оцените внешний вид устройства</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-slate-400 font-medium">4 градации</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {BODY_CONDITIONS.map((b) => {
+                        const isSelected = selectedBody.id === b.id;
+                        return (
+                          <button
+                            key={b.id}
+                            type="button"
+                            onClick={() => setSelectedBody(b)}
+                            className={`p-3.5 rounded-2xl flex flex-col items-center text-center transition-all border cursor-pointer active:scale-95 ${
+                              isSelected
+                                ? 'bg-[#7a0f2d] text-[#ffead1] border-[#7a0f2d] shadow-sm dark:bg-[#7a0f2d] dark:text-[#ffead1] dark:border-[#b4401f]'
+                                : 'bg-slate-50 dark:bg-[#181d2a] text-slate-800 dark:text-slate-200 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-[#202738]'
+                            }`}
+                          >
+                            <span
+                              className="w-4 h-4 rounded-full mb-2 border border-black/20 dark:border-white/20 shadow-xs"
+                              style={{ backgroundColor: b.color }}
+                            />
+                            <span className="font-black text-xs sm:text-sm mb-1">{b.label}</span>
+                            <span className={`text-[11px] leading-tight ${isSelected ? 'text-[#ffead1]/80' : 'text-slate-400'}`}>
+                              {b.hint}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* STEP 6: EXTRAS & DEFECTS */}
+                  <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="w-7 h-7 rounded-full bg-[#7a0f2d] text-[#ffead1] text-xs font-black flex items-center justify-center shrink-0">
+                        6
+                      </span>
+                      <div>
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                          Дополнительные параметры и нюансы
+                        </h3>
+                        <p className="text-[11px] text-slate-400">Отметьте, если есть особенности комплектации или ремонта</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+                      {EXTRAS_OPTIONS.map((extra) => {
+                        const isChecked = !!selectedExtras[extra.id];
+                        return (
+                          <button
+                            key={extra.id}
+                            type="button"
+                            onClick={() => toggleExtra(extra.id)}
+                            className={`p-3 rounded-2xl text-left flex items-center gap-3 transition-all border text-xs sm:text-sm font-bold cursor-pointer ${
+                              isChecked
+                                ? 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-400 dark:border-amber-600/60 shadow-2xs'
+                                : 'bg-slate-50 dark:bg-[#181d2a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-[#202738]'
+                            }`}
+                          >
+                            <div
+                              className={`w-4 h-4 rounded-md flex items-center justify-center text-xs shrink-0 transition-colors ${
+                                isChecked ? 'bg-amber-600 text-white' : 'border border-slate-300 dark:border-white/20'
+                              }`}
+                            >
+                              {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                            <span className="flex-1">{extra.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Blocked Reason Switch */}
+                    <button
+                      type="button"
+                      onClick={() => setIsBlocked(!isBlocked)}
+                      className={`w-full p-3.5 rounded-2xl text-left flex items-center gap-3 transition-all border text-xs sm:text-sm font-bold cursor-pointer ${
+                        isBlocked
+                          ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 border-rose-300 dark:border-rose-700 shadow-2xs'
+                          : 'bg-slate-50 dark:bg-[#181d2a] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-[#202738]'
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-md flex items-center justify-center text-xs shrink-0 transition-colors ${
+                          isBlocked ? 'bg-rose-600 text-white' : 'border border-slate-300 dark:border-white/20'
+                        }`}
+                      >
+                        {isBlocked && <Check className="w-3 h-3 stroke-[3]" />}
+                      </div>
+                      <div className="flex-1">
+                        <span>{BLOCKED_REASON}</span>
+                        {isBlocked && (
+                          <p className="text-[11px] text-rose-600 dark:text-rose-300 mt-1 font-normal leading-normal">
+                            Внимание: устройства с чужим Apple ID или блокировкой активации не выкупаются.
+                          </p>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* RIGHT COLUMN: STICKY RESULT CARD */}
+                <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4">
+                  
+                  <div className="rounded-3xl p-6 sm:p-7 bg-white dark:bg-[#121826] text-slate-900 dark:text-white shadow-xl border border-slate-200/90 dark:border-white/10 relative overflow-hidden transition-colors">
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xs font-black text-[#7a0f2d] dark:text-amber-400 uppercase tracking-wider">
+                        Предварительный расчет
+                      </span>
+                      <button
+                        type="button"
+                        onClick={copyValuationSummary}
+                        disabled={!calculation.canBuy}
+                        className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors disabled:opacity-40 cursor-pointer font-bold"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>{copiedValuation ? 'Скопировано!' : 'Копировать'}</span>
+                      </button>
+                    </div>
+
+                    <div className="mb-5">
+                      {calculation.canBuy ? (
+                        <div>
+                          <div className="text-4xl sm:text-5xl font-black tracking-tight text-[#7a0f2d] dark:text-emerald-400 font-mono">
+                            {formatPrice(calculation.price)}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-snug">
+                            Итоговая сумма подтверждается после 5-минутного осмотра в магазине на пр. Абылай хана, 113
+                          </p>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="text-2xl font-black text-rose-600 dark:text-rose-400">
+                            Выкуп невозможен
+                          </div>
+                          <p className="text-xs text-rose-500 dark:text-rose-300 mt-1">
+                            {calculation.reason}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {calculation.canBuy && (
+                      <div className="py-3 px-3.5 rounded-2xl bg-slate-50 dark:bg-[#182033] border border-slate-200/70 dark:border-white/10 text-xs text-slate-700 dark:text-slate-200 space-y-2 mb-6">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400">Модель:</span>
+                          <span className="font-bold text-slate-900 dark:text-white">
+                            {selectedModel.name} · {formatStorage(selectedStorage)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400">АКБ:</span>
+                          <span className="font-bold font-mono text-slate-900 dark:text-white">{batteryPct}%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400">Корпус:</span>
+                          <span className="font-bold text-slate-900 dark:text-white">{selectedBody.label}</span>
+                        </div>
+                        {calculation.activeExtrasLabels.length > 0 && (
+                          <div className="flex items-start justify-between pt-1.5 border-t border-slate-200/60 dark:border-white/10">
+                            <span className="text-slate-500 dark:text-slate-400">Особенности:</span>
+                            <span className="font-bold text-right text-slate-900 dark:text-white pl-2">
+                              {calculation.activeExtrasLabels.join(', ')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="space-y-2.5">
+                      {/* Button 1: Send to WhatsApp */}
+                      <a
+                        href={waUrlSell}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${
+                          calculation.canBuy
+                            ? 'bg-[#25D366] hover:bg-[#20ba59] text-white active:scale-[0.99] cursor-pointer'
+                            : 'bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-500 pointer-events-none opacity-60'
+                        }`}
+                      >
+                        <MessageCircle className="w-4 h-4 fill-current" />
+                        <span>Отправить заявку на выкуп в WhatsApp</span>
+                      </a>
+
+                      {/* Button 2: Apply to Trade-In for New Device */}
+                      <button
+                        type="button"
+                        onClick={handleApplyTradeIn}
+                        disabled={!calculation.canBuy}
+                        className={`w-full py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all border ${
+                          calculation.canBuy
+                            ? 'bg-[#7a0f2d] hover:bg-[#b4401f] text-[#ffead1] border-[#7a0f2d] shadow-sm active:scale-[0.99] cursor-pointer'
+                            : 'bg-slate-100 dark:bg-white/5 text-slate-400 border-transparent pointer-events-none opacity-60'
+                        }`}
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        <span>Обменять на новый по Trade-In (скидка {formatPrice(calculation.price)})</span>
+                      </button>
+                    </div>
+
+                    {/* Guarantees List */}
+                    <div className="mt-6 pt-5 border-t border-slate-100 dark:border-white/10 space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span>Деньги сразу: наличными или переводом на Kaspi Gold</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span>Быстрая диагностика за 5–10 минут при вас</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span>Честный расчет без скрытых комиссий</span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Direct Telegram & 2GIS Fast Links */}
+                  {/* High-Visibility Telegram B/U Showcase Card */}
+                  <a
+                    href={`https://t.me/${SITE_INFO.telegram}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#229ED9]/15 via-[#229ED9]/10 to-[#229ED9]/25 hover:from-[#229ED9]/25 hover:to-[#229ED9]/35 border-2 border-[#229ED9]/60 hover:border-[#229ED9] shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-11 h-11 rounded-2xl bg-[#229ED9] text-white flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                          <Send className="w-5 h-5 -rotate-12 translate-x-0.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[11px] uppercase tracking-wider font-extrabold text-[#229ED9]">
+                            Каталог Б/У в Telegram:
+                          </div>
+                          <div className="text-sm sm:text-base font-black text-slate-900 dark:text-white truncate">
+                            @{SITE_INFO.telegram} ↗
+                          </div>
+                          <div className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300">
+                            Реальные фото устройств и остаток АКБ
+                          </div>
+                        </div>
+                      </div>
+                      <div className="shrink-0 px-3 py-1.5 rounded-xl bg-[#229ED9] text-white text-xs font-black shadow-xs group-hover:bg-[#1a8bc0] transition-colors flex items-center gap-1">
+                        <span>Открыть</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+                  </a>
+
+                </div>
+
+              </div>
+
+            </section>
+
+            {/* 3. HOW IT WORKS (КАК РАБОТАЕТ ВЫКУП И TRADE-IN) */}
+            <section id="how" className="py-8 bg-white dark:bg-[#121622] rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-white/10 shadow-xs scroll-mt-20">
+              <div className="text-center max-w-xl mx-auto mb-8">
+                <span className="text-xs font-black uppercase tracking-wider text-[#7a0f2d] dark:text-amber-400">
+                  Прозрачный процесс
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+                  Как работает скупка и Trade-In в Bylance
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  Всего 3 простых шага от онлайн-оценки до получения денег или нового телефона
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-[#181d2a] border border-slate-200/70 dark:border-white/5 space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#7a0f2d] text-[#ffead1] flex items-center justify-center font-black text-base shadow-xs">
+                    1
+                  </div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                    Оцените онлайн
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Выберите вашу модель iPhone, объём памяти и состояние аккумулятора в калькуляторе выше. Это занимает ровно минуту.
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-[#181d2a] border border-slate-200/70 dark:border-white/5 space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#7a0f2d] text-[#ffead1] flex items-center justify-center font-black text-base shadow-xs">
+                    2
+                  </div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                    Отправьте заявку в WhatsApp
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Нажмите «Отправить заявку» — откроется WhatsApp с заполненной спецификацией вашего устройства. Менеджер подтвердит время визита.
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-[#181d2a] border border-slate-200/70 dark:border-white/5 space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#7a0f2d] text-[#ffead1] flex items-center justify-center font-black text-base shadow-xs">
+                    3
+                  </div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                    Приезжайте и получите оплату
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Мастер проверит телефон за 5–10 минут в магазине на пр. Абылай хана, 113. Сразу выплачиваем деньги наличными/Kaspi или оформляем новый гаджет с зачетом суммы.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* 4. VALUATION / TRADE-IN FAQ */}
+            <section className="space-y-4">
+              <div className="text-center max-w-xl mx-auto">
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                  Частые вопросы по выкупу
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2a1a1f] dark:text-[#ffead1] mt-1">
+                  Вопросы о выкупе и Trade-In iPhone
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-[#ffead1]/70 mt-1">
+                  Всё о диагностике, расчёте стоимости, способах выплаты и обмене на новый гаджет
+                </p>
+              </div>
+
+              <div className="max-w-3xl mx-auto space-y-3 pt-2">
+                {VALUATION_FAQ_LIST.map((faq) => {
+                  const isOpen = openFaqId === faq.id;
+                  return (
+                    <div
+                      key={faq.id}
+                      className="rounded-2xl bg-white dark:bg-[#121622] border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs transition-colors"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
+                        className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 font-extrabold text-sm sm:text-base text-[#2a1a1f] dark:text-white hover:text-[#7a0f2d] dark:hover:text-[#ffead1] transition-colors"
+                      >
+                        <span>{faq.question}</span>
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform ${
+                            isOpen ? 'rotate-180 text-amber-600 dark:text-amber-400' : 'text-slate-400'
+                          }`}
+                        >
+                          <ChevronDown className="w-5 h-5" />
+                        </div>
+                      </button>
+
+                      {isOpen && (
+                        <div className="px-4 pb-5 sm:px-5 sm:pb-6 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-white/5 pt-3 space-y-2">
+                          <p className="whitespace-pre-line">{faq.answer}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* 5. PROMINENT TELEGRAM B/U SHOWCASE */}
+            <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-[#229ED9]/20 via-[#229ED9]/15 to-[#229ED9]/25 border-2 border-[#229ED9]/60 dark:border-[#229ED9]/50 shadow-md flex flex-col md:flex-row items-center justify-between gap-5">
+              <div className="flex items-center gap-4 text-center md:text-left">
+                <div className="w-14 h-14 rounded-2xl bg-[#229ED9] text-white flex items-center justify-center shrink-0 shadow-lg">
+                  <Send className="w-7 h-7 -rotate-12 translate-x-0.5" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-black uppercase tracking-wider text-[#229ED9] flex items-center justify-center md:justify-start gap-1.5">
+                    <span>Канал проверенной техники</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5">
+                    Каталог Б/У в Telegram: <span className="text-[#229ED9] underline decoration-2">@{SITE_INFO.telegram} ↗</span>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-xl">
+                    Каждый день выкладываем проверенные iPhone с остатком аккумулятора, подробными фото и ценой выкупа/продажи.
+                  </p>
+                </div>
+              </div>
+              <a
+                href={`https://t.me/${SITE_INFO.telegram}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 px-6 py-3.5 rounded-2xl bg-[#229ED9] hover:bg-[#1a8bc0] text-white font-extrabold text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+              >
+                <Send className="w-4 h-4" />
+                <span>Перейти в @{SITE_INFO.telegram} ↗</span>
+              </a>
+            </div>
+
+            {/* 6. CALLOUT: GO TO STORE CATALOG */}
+            <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-[#7a0f2d]/15 via-[#7a0f2d]/10 to-[#ffead1]/20 dark:from-[#7a0f2d]/40 dark:via-[#2a1a1f] dark:to-[#ffead1]/10 border border-[#7a0f2d]/30 shadow-xs flex flex-col md:flex-row items-center justify-between gap-5">
+              <div className="flex items-center gap-4 text-center md:text-left">
+                <div className="w-12 h-12 rounded-2xl bg-[#7a0f2d] text-[#ffead1] flex items-center justify-center shrink-0 shadow-sm">
+                  <ShoppingCart className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-black uppercase tracking-wider text-[#7a0f2d] dark:text-[#ffead1]">
+                    Каталог техники в наличии
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
+                    Готовы выбрать новое устройство?
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-xl">
+                    В нашем каталоге представлены новые запечатанные Apple iPhone 16/15, MacBook, iPad, стайлеры Dyson и фототехника с гарантией и рассрочкой.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigateTo('catalog')}
+                className="shrink-0 px-6 py-3 rounded-2xl bg-[#7a0f2d] hover:bg-[#8e1236] text-[#ffead1] font-extrabold text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+              >
+                <span>Перейти в каталог магазина</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </>
+        )}
       </main>
 
       {/* ====================================================================== */}
@@ -1926,8 +3066,22 @@ export default function App() {
             <span>Магазин оригинальной электроники в Алматы</span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-semibold">
-            <a href="#founder" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => navigateTo('catalog')}
+              className={`hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer ${activePage === 'catalog' ? 'text-[#7a0f2d] dark:text-[#ffead1] font-bold' : ''}`}
+            >
+              Каталог
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateTo('valuation')}
+              className={`hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer ${activePage === 'valuation' ? 'text-amber-600 dark:text-amber-400 font-bold' : ''}`}
+            >
+              Оценка iPhone
+            </button>
+            <a href="#founder" onClick={() => { if (activePage !== 'catalog') navigateTo('catalog'); }} className="hover:text-slate-900 dark:hover:text-white transition-colors">
               Об основательнице
             </a>
             <a href="#faq" className="hover:text-slate-900 dark:hover:text-white transition-colors">
@@ -1957,35 +3111,98 @@ export default function App() {
       </footer>
 
       {/* ====================================================================== */}
-      {/* 10. FLOATING BOTTOM BAR (NOWRAP PRICE, PERFECT MOBILE/TABLET FIT)      */}
+      {/* 10. FIXED BOTTOM NAVIGATION BAR ("ОТДЕЛЬНАЯ СТРАНИЦА СНИЗУ")           */}
       {/* ====================================================================== */}
-      {cartTotals.totalCount > 0 && !isCartOpen && (
-        <div className="fixed bottom-4 left-4 right-4 z-40 max-w-xl mx-auto">
-          <div className="bg-[#7a0f2d] dark:bg-[#2a1a1f] text-white rounded-2xl p-3 sm:p-4 shadow-xl flex items-center justify-between gap-3 border border-[#b4401f]/40">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-white/15 text-[#ffead1] flex items-center justify-center font-black text-sm shrink-0">
-                {cartTotals.totalCount}
-              </div>
-              <div className="min-w-0">
-                <span className="text-[11px] uppercase tracking-wider text-[#ffead1]/80 block truncate">
-                  В корзине
-                </span>
-                <span className="text-base sm:text-lg font-black font-mono text-[#ffead1] whitespace-nowrap inline-block">
-                  {cartTotals.totalPrice > 0 ? formatPrice(cartTotals.totalPrice) : 'По запросу'}
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#ffead1] text-[#7a0f2d] font-bold text-xs sm:text-sm hover:bg-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95 shrink-0"
+      <nav
+        aria-label="Нижняя панель навигации"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0c101a]/95 backdrop-blur-md border-t border-slate-200/80 dark:border-white/10 shadow-2xl px-2 sm:px-6 py-2 transition-colors md:hidden"
+      >
+        <div className="max-w-xl mx-auto flex items-center justify-around gap-1 sm:gap-2">
+          {/* 1. Каталог */}
+          <button
+            type="button"
+            onClick={() => navigateTo('catalog')}
+            className={`flex-1 py-1 px-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-center transition-all cursor-pointer ${
+              activePage === 'catalog'
+                ? 'text-[#7a0f2d] dark:text-[#ffead1] font-black'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
+            }`}
+          >
+            <div
+              className={`p-1.5 rounded-xl transition-all ${
+                activePage === 'catalog'
+                  ? 'bg-[#7a0f2d]/10 dark:bg-[#7a0f2d]/40 text-[#7a0f2d] dark:text-[#ffead1]'
+                  : ''
+              }`}
             >
-              <span>В корзину</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+              <ShoppingCart className="w-5 h-5" />
+            </div>
+            <span className="text-[11px] sm:text-xs tracking-tight">Каталог</span>
+          </button>
+
+          {/* 2. Оценка iPhone */}
+          <button
+            type="button"
+            onClick={() => navigateTo('valuation')}
+            className={`flex-1 py-1 px-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-center transition-all cursor-pointer ${
+              activePage === 'valuation'
+                ? 'text-amber-600 dark:text-amber-400 font-black'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
+            }`}
+          >
+            <div
+              className={`p-1.5 rounded-xl transition-all ${
+                activePage === 'valuation'
+                  ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                  : ''
+              }`}
+            >
+              <RefreshCw className="w-5 h-5" />
+            </div>
+            <span className="text-[11px] sm:text-xs tracking-tight">Оценка iPhone</span>
+          </button>
+
+          {/* 3. Корзина */}
+          <button
+            type="button"
+            onClick={() => setIsCartOpen(true)}
+            className="flex-1 py-1 px-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold transition-all cursor-pointer relative"
+          >
+            <div className="relative">
+              <div className="p-1.5 rounded-xl">
+                <ShoppingCart className="w-5 h-5" />
+              </div>
+              {cartTotals.totalCount > 0 && (
+                <span className="absolute -top-1 -right-2 px-1.5 py-0.2 rounded-full bg-[#7a0f2d] text-[#ffead1] text-[10px] font-black font-mono shadow-2xs">
+                  {cartTotals.totalCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[11px] sm:text-xs tracking-tight">
+              {cartTotals.totalCount > 0 ? (
+                <span className="font-bold text-[#7a0f2d] dark:text-[#ffead1] font-mono">
+                  {cartTotals.totalPrice > 0 ? formatPrice(cartTotals.totalPrice) : 'Корзина'}
+                </span>
+              ) : (
+                'Корзина'
+              )}
+            </span>
+          </button>
+
+          {/* 4. WhatsApp */}
+          <a
+            href={`https://wa.me/${SITE_INFO.whatsapp}?text=${encodeURIComponent('Здравствуйте! Хочу проконсультироваться по покупке или Trade-In в магазине Bylance.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 py-1 px-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-center text-slate-500 dark:text-slate-400 hover:text-[#25D366] font-semibold transition-all"
+          >
+            <div className="p-1.5 rounded-xl text-[#25D366]">
+              <MessageCircle className="w-5 h-5 fill-current" />
+            </div>
+            <span className="text-[11px] sm:text-xs tracking-tight">WhatsApp</span>
+          </a>
         </div>
-      )}
+      </nav>
 
       {/* ====================================================================== */}
       {/* 11. CART DRAWER (FULL HEIGHT ON TABLET & MOBILE, BODY SCROLL LOCKED,    */}
@@ -2061,13 +3278,13 @@ export default function App() {
                       className="p-3.5 rounded-xl bg-white dark:bg-[#181d2a] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3"
                     >
                       <div className="flex items-start gap-3">
-                        {/* Thumbnail */}
-                        <div className="w-14 h-14 rounded-lg bg-slate-100 dark:bg-[#121622] p-1 shrink-0 overflow-hidden border border-slate-200/60 dark:border-white/5 flex items-center justify-center">
+                        {/* Thumbnail: white bg, rounded-xl */}
+                        <div className="w-14 h-14 rounded-xl bg-white p-1 shrink-0 overflow-hidden border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-2xs">
                           <ProductImage
                             src={item.image}
                             alt={item.fullName}
                             size="thumb"
-                            className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal"
+                            className="w-full h-full object-contain rounded-lg"
                           />
                         </div>
 
@@ -2171,11 +3388,45 @@ export default function App() {
             {/* Drawer Footer with Checkout (Non-scrolling, Nowrap Price) */}
             {cart.length > 0 && (
               <div className="p-4 sm:p-5 border-t border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#0e121c] space-y-3 shrink-0">
+                
+                {/* Trade-In in Cart */}
+                {tradeInApplied ? (
+                  <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700/60 flex items-center justify-between text-xs">
+                    <div>
+                      <span className="font-bold text-emerald-800 dark:text-emerald-300 block">
+                        Скидка Trade-In ({tradeInApplied.modelName})
+                      </span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                        Учтено по предварительной оценке
+                      </span>
+                    </div>
+                    <span className="font-mono font-black text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
+                      -{formatPrice(tradeInApplied.price)}
+                    </span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCartOpen(false);
+                      setTimeout(() => {
+                        document.getElementById('valuation')?.scrollIntoView({ behavior: 'smooth' });
+                      }, 150);
+                    }}
+                    className="w-full py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>Сдать свой старый iPhone в Trade-In (минус от цены)</span>
+                  </button>
+                )}
+
                 <div className="space-y-1 text-xs">
                   <div className="flex items-center justify-between gap-3 text-base sm:text-lg font-black">
-                    <span className="text-slate-900 dark:text-white shrink-0">Итого к оплате:</span>
+                    <span className="text-slate-900 dark:text-white shrink-0">
+                      {tradeInApplied ? 'Итого к доплате:' : 'Итого к оплате:'}
+                    </span>
                     <span className="text-[#7a0f2d] dark:text-[#ffead1] font-mono text-xl whitespace-nowrap shrink-0 text-right">
-                      {formatPrice(cartTotals.totalPrice)}
+                      {formatPrice(Math.max(0, cartTotals.totalPrice - (tradeInApplied ? tradeInApplied.price : 0)))}
                     </span>
                   </div>
                   {cartTotals.hasUnpricedItems && (

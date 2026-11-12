@@ -4,9 +4,20 @@
  * ============================================================================
  * Модели с выбором памяти и SIM, 4 способа оплаты, полный каталог.
  */
-import { PRODUCT_IMAGES } from './productImages';
+import { PRODUCT_IMAGES, WEBP_IMAGES } from './productImages';
 
-// 1. КОНТАКТЫ МАГАЗИНА
+export interface StoreAddress {
+  id: string;
+  title: string;
+  address: string;
+  description: string;
+  hours: string;
+  isMain: boolean;
+  badge: string;
+  gis: string;
+}
+
+// 1. КОНТАКТЫ МАГАЗИНА (ДВА АДРЕСА: ГЛАВНЫЙ И ВТОРОЙ ФИЛИАЛ)
 export const SITE_INFO = {
   shopName: "Bylance",
   city: "Алматы",
@@ -15,7 +26,33 @@ export const SITE_INFO = {
   whatsappFormatted: "+7 (776) 529-39-16",
   telegram: "bylance",
   gis: "https://2gis.kz/almaty",
-  address: "г. Алматы, пр. Абылай хана (точный адрес уточняйте в WhatsApp)",
+  // Магазин новой техники
+  address: "г. Алматы, пр. Абылай хана, 113",
+  addressMain: "г. Алматы, пр. Абылай хана, 113",
+  // Магазин Б/У техники и Trade-In
+  addressSecond: "г. Алматы, пр. Абылай хана (ориентир уточняйте в WhatsApp)",
+  addresses: [
+    {
+      id: 'new-store',
+      title: 'Магазин новой техники',
+      address: 'г. Алматы, пр. Абылай хана, 113',
+      description: 'Магазин новой запечатанной техники: оригинальные устройства Apple, стайлеры Dyson и гаджеты с официальной гарантией 1–2 года и рассрочкой.',
+      hours: 'Ежедневно 10:00–20:00',
+      isMain: false,
+      badge: 'Новая техника',
+      gis: 'https://2gis.kz/almaty',
+    },
+    {
+      id: 'used-store',
+      title: 'Магазин Б/У техники и Trade-In',
+      address: 'г. Алматы, пр. Абылай хана',
+      description: 'Магазин проверенной Б/У техники и центр Trade-In: быстрая диагностика при вас, честный выкуп за наличные/Kaspi и выгодный обмен с доплатой.',
+      hours: 'Ежедневно 10:00–20:00',
+      isMain: false,
+      badge: 'Б/У и Trade-In',
+      gis: 'https://2gis.kz/almaty',
+    },
+  ] as StoreAddress[],
   hours: "Ежедневно 10:00–20:00",
   roundTo: 1000,
   founder: {
@@ -114,40 +151,79 @@ export interface ProductColor {
 }
 
 // ГОТОВЫЕ ЦВЕТОВЫЕ НАБОРЫ (пользователь может менять картинки на свои в любое время)
-export const IPHONE_PRO_COLORS: ProductColor[] = [
-  { id: 'desert', name: 'Desert Titanium (Пустынный)', hex: '#c5b39b', image: PRODUCT_IMAGES.iphoneDesert },
-  { id: 'natural', name: 'Natural Titanium (Натуральный)', hex: '#9f9b96', image: PRODUCT_IMAGES.iphoneNatural },
-  { id: 'white', name: 'White Titanium (Белый)', hex: '#f2f1ed', image: PRODUCT_IMAGES.iphoneWhite },
-  { id: 'black', name: 'Black Titanium (Чёрный)', hex: '#3b3b3d', image: PRODUCT_IMAGES.iphoneBlack },
+// ГОТОВЫЕ ЦВЕТОВЫЕ НАБОРЫ С ПОДДЕРЖКОЙ WEBP ИЗОБРАЖЕНИЙ
+export const IPHONE_18_PRO_COLORS: ProductColor[] = [
+  { id: 'black', name: 'Black Titanium (Чёрный)', hex: '#212124', image: WEBP_IMAGES.iphone18ProBlack },
+  { id: 'blue', name: 'Deep Blue (Тёмно-синий)', hex: '#27384e', image: WEBP_IMAGES.iphone18ProBlue },
+  { id: 'red', name: 'Crimson Red (Красный титан)', hex: '#7a0f2d', image: WEBP_IMAGES.iphone18ProRed },
+  { id: 'silver', name: 'Silver Titanium (Серебристый)', hex: '#e3e4e6', image: WEBP_IMAGES.iphone18ProSilver },
 ];
 
-export const IPHONE_BASE_COLORS: ProductColor[] = [
-  { id: 'ultramarine', name: 'Ultramarine (Ультрамарин)', hex: '#48638b', image: PRODUCT_IMAGES.iphone },
-  { id: 'teal', name: 'Teal (Бирюзовый)', hex: '#97baaf', image: PRODUCT_IMAGES.iphone },
-  { id: 'pink', name: 'Pink (Розовый)', hex: '#e9b3ba', image: PRODUCT_IMAGES.iphone },
-  { id: 'white', name: 'White (Белый)', hex: '#f8f8f8', image: PRODUCT_IMAGES.iphone },
-  { id: 'black', name: 'Black (Чёрный)', hex: '#353839', image: PRODUCT_IMAGES.iphone },
+export const IPHONE_17_COLORS: ProductColor[] = [
+  { id: 'black', name: 'Black (Чёрный)', hex: '#222326', image: WEBP_IMAGES.iphone17Black },
+  { id: 'blue', name: 'Blue (Синий)', hex: '#3d6389', image: WEBP_IMAGES.iphone17Blue },
+  { id: 'green', name: 'Green (Мятно-зелёный)', hex: '#5b8e78', image: WEBP_IMAGES.iphone17Green },
+  { id: 'purple', name: 'Purple (Лавандовый)', hex: '#9d8db9', image: WEBP_IMAGES.iphone17Purple },
+  { id: 'white', name: 'White (Белый)', hex: '#f7f7f9', image: WEBP_IMAGES.iphone17White },
 ];
 
-export const IPAD_COLORS: ProductColor[] = [
-  { id: 'space-gray', name: 'Space Gray (Серый космос)', hex: '#6e6f73', image: PRODUCT_IMAGES.ipad },
-  { id: 'blue', name: 'Blue (Синий)', hex: '#899ab0', image: PRODUCT_IMAGES.ipad },
-  { id: 'purple', name: 'Purple (Фиолетовый)', hex: '#b8b1ca', image: PRODUCT_IMAGES.ipad },
-  { id: 'starlight', name: 'Starlight (Сияющая звезда)', hex: '#e5e0d8', image: PRODUCT_IMAGES.ipad },
+export const IPHONE_17_PRO_COLORS: ProductColor[] = [
+  { id: 'blue', name: 'Dark Blue (Синий титан)', hex: '#24374e', image: WEBP_IMAGES.iphone17ProBlue },
+  { id: 'orange', name: 'Cosmic Orange (Оранжевый)', hex: '#d96c34', image: WEBP_IMAGES.iphone17ProOrange },
+  { id: 'white', name: 'White Titanium (Белый титан)', hex: '#f2f2f4', image: WEBP_IMAGES.iphone17ProWhite },
 ];
 
-export const MACBOOK_COLORS: ProductColor[] = [
-  { id: 'midnight', name: 'Midnight (Тёмная ночь)', hex: '#2e3642', image: PRODUCT_IMAGES.macbook },
-  { id: 'starlight', name: 'Starlight (Сияющая звезда)', hex: '#f0e4d3', image: PRODUCT_IMAGES.macbook },
-  { id: 'space-gray', name: 'Space Gray (Серый космос)', hex: '#7d7e80', image: PRODUCT_IMAGES.macbook },
-  { id: 'silver', name: 'Silver (Серебристый)', hex: '#e3e4e6', image: PRODUCT_IMAGES.macbook },
+export const IPHONE_A16_COLORS: ProductColor[] = [
+  { id: 'blue', name: 'Blue (Синий)', hex: '#3f6795', image: WEBP_IMAGES.iphoneA16Blue },
+  { id: 'lightblue', name: 'Light Blue (Голубой)', hex: '#97bfdf', image: WEBP_IMAGES.iphoneA16LightBlue },
+  { id: 'pink', name: 'Pink (Розовый)', hex: '#e7a9b6', image: WEBP_IMAGES.iphoneA16Pink },
+  { id: 'silver', name: 'Silver (Серебристый)', hex: '#e2e3e5', image: WEBP_IMAGES.iphoneA16Silver },
+  { id: 'yellow', name: 'Yellow (Лимонный)', hex: '#edd362', image: WEBP_IMAGES.iphoneA16Yellow },
 ];
 
-export const WATCH_COLORS: ProductColor[] = [
-  { id: 'jet-black', name: 'Jet Black (Глянцевый чёрный)', hex: '#1a1a1a', image: PRODUCT_IMAGES.watch },
-  { id: 'rose-gold', name: 'Rose Gold (Розовое золото)', hex: '#eecbc4', image: PRODUCT_IMAGES.watch },
-  { id: 'silver', name: 'Silver (Серебристый)', hex: '#e3e4e6', image: PRODUCT_IMAGES.watch },
+export const IPHONE_DUO_COLORS: ProductColor[] = [
+  { id: 'blue', name: 'Deep Blue (Глубокий синий)', hex: '#1e324f', image: WEBP_IMAGES.iphoneDuoBlue },
+  { id: 'white', name: 'Pure White (Белоснежный)', hex: '#ffffff', image: WEBP_IMAGES.iphoneDuoWhite },
 ];
+
+export const IPAD_AIR_M4_COLORS: ProductColor[] = [
+  { id: 'blue', name: 'Blue (Синий)', hex: '#899ab0', image: WEBP_IMAGES.ipadAirBlue },
+  { id: 'purple', name: 'Purple (Фиолетовый)', hex: '#b8b1ca', image: WEBP_IMAGES.ipadAirPurple },
+  { id: 'space-gray', name: 'Space Gray (Серый космос)', hex: '#6e6f73', image: WEBP_IMAGES.ipadAirSpaceGray },
+  { id: 'starlight', name: 'Starlight (Сияющая звезда)', hex: '#e5e0d8', image: WEBP_IMAGES.ipadAirStarlight },
+];
+
+export const MACBOOK_AIR_M5_COLORS: ProductColor[] = [
+  { id: 'blue', name: 'Midnight Blue (Тёмно-синий)', hex: '#263445', image: WEBP_IMAGES.macbookAirBlue },
+  { id: 'golden', name: 'Starlight Gold (Золотистый)', hex: '#e9dfcc', image: WEBP_IMAGES.macbookAirGolden },
+  { id: 'lightblue', name: 'Sky Blue (Небесный)', hex: '#b0c5da', image: WEBP_IMAGES.macbookAirLightBlue },
+  { id: 'silver', name: 'Silver (Серебристый)', hex: '#e2e3e5', image: WEBP_IMAGES.macbookAirSilver },
+];
+
+export const MACBOOK_NEO_COLORS: ProductColor[] = [
+  { id: 'blue', name: 'Neo Blue (Нео-синий)', hex: '#314a6b', image: WEBP_IMAGES.macbookNeoBlue },
+  { id: 'pink', name: 'Neo Pink (Нео-розовый)', hex: '#df9fae', image: WEBP_IMAGES.macbookNeoPink },
+  { id: 'silver', name: 'Neo Silver (Серебристый)', hex: '#e1e2e4', image: WEBP_IMAGES.macbookNeoSilver },
+  { id: 'yellow', name: 'Neo Yellow (Солнечный)', hex: '#e8cd5e', image: WEBP_IMAGES.macbookNeoYellow },
+];
+
+export const WATCH_11_COLORS: ProductColor[] = [
+  { id: 'black', name: 'Jet Black (Глянцевый чёрный)', hex: '#1a1a1a', image: WEBP_IMAGES.watch11Black },
+  { id: 'grey', name: 'Space Grey (Космический серый)', hex: '#58595b', image: WEBP_IMAGES.watch11Grey },
+  { id: 'pink', name: 'Rose Pink (Розовый)', hex: '#e8b8b8', image: WEBP_IMAGES.watch11Pink },
+  { id: 'silver', name: 'Silver (Серебристый)', hex: '#e2e3e5', image: WEBP_IMAGES.watch11Silver },
+];
+
+export const WATCH_SE_COLORS: ProductColor[] = [
+  { id: 'black', name: 'Midnight Black (Тёмная ночь)', hex: '#1f2022', image: WEBP_IMAGES.watchSe40Black },
+  { id: 'golden', name: 'Starlight Gold (Сияющая звезда)', hex: '#e6ded3', image: WEBP_IMAGES.watchSe40Golden },
+];
+
+export const IPHONE_PRO_COLORS: ProductColor[] = IPHONE_18_PRO_COLORS;
+export const IPHONE_BASE_COLORS: ProductColor[] = IPHONE_17_COLORS;
+export const IPAD_COLORS: ProductColor[] = IPAD_AIR_M4_COLORS;
+export const MACBOOK_COLORS: ProductColor[] = MACBOOK_AIR_M5_COLORS;
+export const WATCH_COLORS: ProductColor[] = WATCH_11_COLORS;
 
 export const DYSON_COLORS: ProductColor[] = [
   { id: 'ceramic-pink', name: 'Ceramic Pink (Керамический розовый)', hex: '#dfa8a8', image: PRODUCT_IMAGES.dyson },
@@ -182,8 +258,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'iPhone 18',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.iphone,
-    colorOptions: IPHONE_PRO_COLORS,
+    image: WEBP_IMAGES.iphone18Pro,
+    colorOptions: IPHONE_18_PRO_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ'],
     variants: [
@@ -241,8 +317,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'iPhone 18',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.iphone,
-    colorOptions: IPHONE_PRO_COLORS,
+    image: WEBP_IMAGES.iphone18Pro,
+    colorOptions: IPHONE_18_PRO_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ', '2 ТБ'],
     variants: [
@@ -314,8 +390,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'iPhone Duo',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.iphone,
-    colorOptions: IPHONE_BASE_COLORS,
+    image: WEBP_IMAGES.iphoneDuoBlue,
+    colorOptions: IPHONE_DUO_COLORS,
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ'],
     variants: [
       {
@@ -348,8 +424,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'iPhone 17',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.iphone,
-    colorOptions: IPHONE_BASE_COLORS,
+    image: WEBP_IMAGES.iphone17Black,
+    colorOptions: IPHONE_17_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ'],
     variants: [
@@ -379,8 +455,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'iPhone 17',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.iphone,
-    colorOptions: IPHONE_PRO_COLORS,
+    image: WEBP_IMAGES.iphone17ProBlue,
+    colorOptions: IPHONE_17_PRO_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ'],
     variants: [
@@ -438,8 +514,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'iPhone 17',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.iphone,
-    colorOptions: IPHONE_PRO_COLORS,
+    image: WEBP_IMAGES.iphone17ProBlue,
+    colorOptions: IPHONE_17_PRO_COLORS,
     simOptions: ['ESIM', 'SIM'],
     storageOptions: ['256 ГБ', '512 ГБ', '1 ТБ', '2 ТБ'],
     variants: [
@@ -511,8 +587,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'iPad',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.ipad,
-    colorOptions: IPAD_COLORS,
+    image: WEBP_IMAGES.iphoneA16Blue,
+    colorOptions: IPHONE_A16_COLORS,
     storageOptions: ['128 ГБ', '256 ГБ'],
     variants: [
       {
@@ -539,8 +615,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'iPad',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.ipad,
-    colorOptions: IPAD_COLORS,
+    image: WEBP_IMAGES.ipadAirSpaceGray,
+    colorOptions: IPAD_AIR_M4_COLORS,
     storageOptions: ['128 ГБ', '256 ГБ'],
     variants: [
       {
@@ -567,8 +643,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'MacBook',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.macbook,
-    colorOptions: MACBOOK_COLORS,
+    image: WEBP_IMAGES.macbookNeoSilver,
+    colorOptions: MACBOOK_NEO_COLORS,
     storageOptions: ['256 ГБ', '512 ГБ'],
     variants: [
       {
@@ -595,8 +671,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'MacBook',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.macbook,
-    colorOptions: MACBOOK_COLORS,
+    image: WEBP_IMAGES.macbookAirSilver,
+    colorOptions: MACBOOK_AIR_M5_COLORS,
     storageOptions: ['512 ГБ'],
     variants: [
       {
@@ -693,8 +769,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'Apple Watch',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.watch,
-    colorOptions: WATCH_COLORS,
+    image: WEBP_IMAGES.watch11Black,
+    colorOptions: WATCH_11_COLORS,
     sizeOptions: ['42 мм', '46 мм'],
     variants: [
       {
@@ -721,8 +797,8 @@ export const PRODUCT_MODELS: ProductModel[] = [
     category: 'apple',
     subcategory: 'Apple Watch',
     warranty: '1 год официальной гарантии',
-    image: PRODUCT_IMAGES.watch,
-    colorOptions: WATCH_COLORS,
+    image: WEBP_IMAGES.watchSe40Black,
+    colorOptions: WATCH_SE_COLORS,
     sizeOptions: ['40 мм', '44 мм'],
     variants: [
       {
@@ -901,3 +977,177 @@ export const formatPrice = (val: number | null | undefined): string => {
   if (val === null || val === undefined) return '';
   return val.toLocaleString('ru-RU').replace(/\u00a0/g, ' ') + '\u00A0₸';
 };
+
+export const formatStorage = (gb: number): string =>
+  gb >= 1024 ? `${gb / 1024} ТБ` : `${gb} ГБ`;
+
+// ============================================================================
+// ⭐️ ДАННЫЕ ОЦЕНКИ И ВЫКУПА Б/У IPHONE (ИЗ BYLANCE_VALUATION)
+// ============================================================================
+export interface UsedGeneration {
+  gen: string;
+  models: {
+    label: string;
+    name: string;
+    prices: Record<number, number>;
+  }[];
+}
+
+export const USED_IPHONES_BUYBACK: UsedGeneration[] = [
+  {
+    gen: "18",
+    models: [
+      { label: "Обычный", name: "iPhone 18", prices: { 128: 360000, 256: 410000, 512: 480000 } },
+      { label: "Air", name: "iPhone Air", prices: { 256: 410000, 512: 490000, 1024: 560000 } },
+      { label: "Pro", name: "iPhone 18 Pro", prices: { 256: 520000, 512: 600000, 1024: 680000 } },
+      { label: "Pro Max", name: "iPhone 18 Pro Max", prices: { 256: 600000, 512: 690000, 1024: 780000 } },
+    ],
+  },
+  {
+    gen: "17",
+    models: [
+      { label: "Обычный", name: "iPhone 17", prices: { 128: 280000, 256: 330000, 512: 400000 } },
+      { label: "Air", name: "iPhone Air", prices: { 256: 330000, 512: 390000, 1024: 450000 } },
+      { label: "Pro", name: "iPhone 17 Pro", prices: { 256: 450000, 512: 520000, 1024: 600000 } },
+      { label: "Pro Max", name: "iPhone 17 Pro Max", prices: { 256: 520000, 512: 600000, 1024: 680000 } },
+    ],
+  },
+  {
+    gen: "16",
+    models: [
+      { label: "16e", name: "iPhone 16e", prices: { 128: 170000, 256: 200000, 512: 240000 } },
+      { label: "Обычный", name: "iPhone 16", prices: { 128: 190000, 256: 225000, 512: 270000 } },
+      { label: "Plus", name: "iPhone 16 Plus", prices: { 128: 210000, 256: 250000, 512: 300000 } },
+      { label: "Pro", name: "iPhone 16 Pro", prices: { 128: 290000, 256: 330000, 512: 390000, 1024: 450000 } },
+      { label: "Pro Max", name: "iPhone 16 Pro Max", prices: { 256: 400000, 512: 460000, 1024: 520000 } },
+    ],
+  },
+  {
+    gen: "15",
+    models: [
+      { label: "Обычный", name: "iPhone 15", prices: { 128: 155000, 256: 185000, 512: 225000 } },
+      { label: "Plus", name: "iPhone 15 Plus", prices: { 128: 175000, 256: 205000, 512: 245000 } },
+      { label: "Pro", name: "iPhone 15 Pro", prices: { 128: 230000, 256: 265000, 512: 310000, 1024: 360000 } },
+      { label: "Pro Max", name: "iPhone 15 Pro Max", prices: { 256: 330000, 512: 380000, 1024: 430000 } },
+    ],
+  },
+  {
+    gen: "14",
+    models: [
+      { label: "Обычный", name: "iPhone 14", prices: { 128: 115000, 256: 135000, 512: 165000 } },
+      { label: "Plus", name: "iPhone 14 Plus", prices: { 128: 130000, 256: 150000, 512: 180000 } },
+      { label: "Pro", name: "iPhone 14 Pro", prices: { 128: 190000, 256: 215000, 512: 250000, 1024: 285000 } },
+      { label: "Pro Max", name: "iPhone 14 Pro Max", prices: { 128: 230000, 256: 255000, 512: 295000, 1024: 335000 } },
+    ],
+  },
+  {
+    gen: "13",
+    models: [
+      { label: "mini", name: "iPhone 13 mini", prices: { 128: 85000, 256: 100000, 512: 120000 } },
+      { label: "Обычный", name: "iPhone 13", prices: { 128: 100000, 256: 118000, 512: 140000 } },
+      { label: "Pro", name: "iPhone 13 Pro", prices: { 128: 145000, 256: 165000, 512: 190000, 1024: 215000 } },
+      { label: "Pro Max", name: "iPhone 13 Pro Max", prices: { 128: 175000, 256: 195000, 512: 225000, 1024: 255000 } },
+    ],
+  },
+  {
+    gen: "12",
+    models: [
+      { label: "mini", name: "iPhone 12 mini", prices: { 64: 55000, 128: 65000, 256: 75000 } },
+      { label: "Обычный", name: "iPhone 12", prices: { 64: 70000, 128: 80000, 256: 92000 } },
+      { label: "Pro", name: "iPhone 12 Pro", prices: { 128: 105000, 256: 118000, 512: 138000 } },
+      { label: "Pro Max", name: "iPhone 12 Pro Max", prices: { 128: 125000, 256: 140000, 512: 160000 } },
+    ],
+  },
+  {
+    gen: "11",
+    models: [
+      { label: "Обычный", name: "iPhone 11", prices: { 64: 55000, 128: 62000, 256: 72000 } },
+      { label: "Pro", name: "iPhone 11 Pro", prices: { 64: 75000, 256: 90000, 512: 105000 } },
+      { label: "Pro Max", name: "iPhone 11 Pro Max", prices: { 64: 90000, 256: 105000, 512: 120000 } },
+    ],
+  },
+  {
+    gen: "X",
+    models: [
+      { label: "X", name: "iPhone X", prices: { 64: 45000, 256: 55000 } },
+      { label: "XR", name: "iPhone XR", prices: { 64: 55000, 128: 62000, 256: 70000 } },
+      { label: "XS", name: "iPhone XS", prices: { 64: 55000, 256: 65000, 512: 75000 } },
+      { label: "XS Max", name: "iPhone XS Max", prices: { 64: 65000, 256: 75000, 512: 85000 } },
+    ],
+  },
+];
+
+export const BATTERY_RULES = [
+  { min: 90, cut: 0 },
+  { min: 85, cut: 3 },
+  { min: 80, cut: 7 },
+  { min: 75, cut: 12 },
+  { min: 0, cut: 18 },
+];
+
+export const BATTERY_PRESETS = [75, 80, 85, 90, 100];
+
+export interface BodyOption {
+  id: string;
+  label: string;
+  hint: string;
+  color: string;
+  cut: number;
+}
+
+export const BODY_CONDITIONS: BodyOption[] = [
+  {
+    id: "perfect",
+    label: "Идеальное",
+    hint: "Как новый, без следов",
+    color: "#38bdf8",
+    cut: 0,
+  },
+  {
+    id: "good",
+    label: "Хорошее",
+    hint: "Еле заметные потёртости",
+    color: "#34d399",
+    cut: 5,
+  },
+  {
+    id: "average",
+    label: "Среднее",
+    hint: "Мелкие царапины",
+    color: "#fbbf24",
+    cut: 12,
+  },
+  {
+    id: "poor",
+    label: "Плохое",
+    hint: "Заметные царапины, вмятины",
+    color: "#f87171",
+    cut: 22,
+  },
+];
+
+export interface ExtraDefect {
+  id: string;
+  label: string;
+  cut: number;
+  isEsimOnly?: boolean;
+}
+
+export const getEsimDeduction = (modelName: string): number => {
+  if (modelName.toLowerCase().includes('pro')) {
+    return 40000;
+  }
+  return 30000;
+};
+
+export const EXTRAS_OPTIONS: ExtraDefect[] = [
+  { id: "esim_only", label: "Только eSIM (США)", cut: 0, isEsimOnly: true },
+  { id: "no_box", label: "Нет коробки и зарядки", cut: 3 },
+  { id: "broken_biometrics", label: "Не работает Face ID / Touch ID", cut: 15 },
+  { id: "replaced_glass", label: "Менялось заднее стекло", cut: 5 },
+  { id: "replaced_screen_orig", label: "Менялся экран (оригинал)", cut: 5 },
+  { id: "replaced_screen", label: "Менялся экран (неоригинал)", cut: 10 },
+];
+
+export const BLOCKED_REASON = "Заблокирован iCloud / чужой Apple ID";
+
